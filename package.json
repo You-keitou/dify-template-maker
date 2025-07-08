@@ -5,7 +5,11 @@
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "mastra dev"
+    "dev": "mastra dev",
+    "prepare": "husky",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
   },
   "keywords": [],
   "author": "",
@@ -13,13 +17,16 @@
   "description": "",
   "type": "module",
   "dependencies": {
+    "@ai-sdk/google": "^1.2.19",
     "@mastra/core": "latest",
     "@mastra/loggers": "latest",
-    "zod": "^3.25.56",
-    "@ai-sdk/google": "^1.2.19"
+    "zod": "^3.25.56"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.1.1",
     "@types/node": "^22.15.29",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
     "mastra": "latest",
     "typescript": "^5.8.3"
   }
