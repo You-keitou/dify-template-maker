@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Claudeプロジェクトのjsonlファイルをコピー
+SOURCE_DIR="$HOME/.claude/projects/-Users-keith-WorkSpace-dify-template-maker"
+DEST_DIR=".claude-log"
+
+# .claude-logディレクトリを作成
+mkdir -p "$DEST_DIR"
+
+# jsonlファイルをコピー
+if [ -d "$SOURCE_DIR" ]; then
+  cp "$SOURCE_DIR"/*.jsonl "$DEST_DIR"/ 2>/dev/null || true
+  echo "✓ Claude project logs copied to .claude-log"
+fi
+
+# テストとタイプチェックを実行
+pnpm test && pnpm typecheck
