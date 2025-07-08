@@ -15,4 +15,6 @@ if [ -d "$SOURCE_DIR" ]; then
 fi
 
 # テストとタイプチェックを実行
-pnpm test && pnpm typecheck
+# TODO: テストが実装されたら有効化
+# pnpm test && pnpm typecheck
+pnpm typecheck
