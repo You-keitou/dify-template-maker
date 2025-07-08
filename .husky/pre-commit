@@ -11,7 +11,7 @@ mkdir -p "$DEST_DIR"
 if [ -d "$SOURCE_DIR" ]; then
   cp "$SOURCE_DIR"/*.jsonl "$DEST_DIR"/ 2>/dev/null || true
   echo "✓ Claude project logs copied to .claude-log"
-  
+
   # 新しいファイルや変更されたファイルがあれば自動的にステージングに追加
   if [ -n "$(git status --porcelain .claude-log/)" ]; then
     git add .claude-log/
