@@ -1,13 +1,13 @@
-import { Mastra } from "@mastra/core/mastra";
-import { PinoLogger } from "@mastra/loggers";
-import { weatherWorkflow } from "./workflows";
-import { weatherAgent } from "./agents";
+import { Mastra } from '@mastra/core/mastra';
+import { PinoLogger } from '@mastra/loggers';
+import { difyTemplateMakerAgent } from './agents';
+import { weatherWorkflow } from './workflows';
 
 export const mastra = new Mastra({
   workflows: { weatherWorkflow },
-  agents: { weatherAgent },
+  agents: { difyTemplateMakerAgent },
   logger: new PinoLogger({
-    name: "Mastra",
-    level: "info",
+    name: 'Mastra',
+    level: 'info',
   }),
 });
