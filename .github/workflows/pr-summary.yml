@@ -2,7 +2,7 @@ name: Generate PR Summary
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, synchronize]
 
 jobs:
   generate-summary:
@@ -33,7 +33,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           direct_prompt: |
-            /project:summary-pr ${{ github.event.pull_request.number }}
+            /summary-pr ${{ github.event.pull_request.number }}
           allowed_tools: |
             Bash(git diff:*),
             Bash(git log:*),
