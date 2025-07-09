@@ -3,7 +3,8 @@ name: Generate PR Summary
 on:
   pull_request:
     types: [opened, synchronize]
-
+    paths:
+      - ".claude-log/**"
 jobs:
   generate-summary:
     runs-on: ubuntu-latest
@@ -17,7 +18,36 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check for .claude-log/ changes
+        id: check_changes
+        run: |
+          if [ "${{ github.event.action }}" == "synchronize" ]; then
+            # GitHub APIから提供されるbefore/afterを使用
+            # これが最も正確にpushの差分を取得できる
+            BEFORE_SHA="${{ github.event.before }}"
+            AFTER_SHA="${{ github.event.after }}"
 
+            echo "📊 Checking changes from $BEFORE_SHA to $AFTER_SHA"
+
+            # リモートから必要な情報を取得
+            git fetch origin +refs/pull/${{ github.event.pull_request.number }}/head:refs/remotes/origin/pr/${{ github.event.pull_request.number }}
+
+            # 差分を確認
+            CHANGED_FILES=$(git diff --name-only $BEFORE_SHA $AFTER_SHA | grep -E '^\.claude-log/' || true)
+
+            if [ -z "$CHANGED_FILES" ]; then
+              echo "has_claude_changes=false" >> $GITHUB_OUTPUT
+              echo "⏭️ No changes in .claude-log/ in this push"
+              echo "📝 Total files changed: $(git diff --name-only $BEFORE_SHA $AFTER_SHA | wc -l)"
+            else
+              echo "has_claude_changes=true" >> $GITHUB_OUTPUT
+              echo "✅ Changes detected in .claude-log/:"
+              echo "$CHANGED_FILES"
+              echo "📝 Number of .claude-log/ files changed: $(echo "$CHANGED_FILES" | wc -l)"
+            fi
+          else
+            echo "has_claude_changes=true" >> $GITHUB_OUTPUT
+          fi
       - name: Check if summary exists
         id: check
         run: |
@@ -33,12 +63,8 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           direct_prompt: |
-            /summary-pr ${{ github.event.pull_request.number }}
+            /project:summary-pr ${{ github.event.pull_request.number }}
           allowed_tools: |
-            Bash(git diff:*),
-            Bash(git log:*),
-            Bash(git add:*),
-            Bash(git commit:*),
-            Bash(git push:*),
+            Bash,
             Write,
             Read
