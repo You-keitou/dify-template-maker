@@ -1,6 +1,6 @@
 ---
 description: PRの作業記録を生成してコミット（Claude Codeセッション情報を含む）
-allowed-tools: Bash(git diff), Bash(git log), Write, Read, Bash(git add), Bash(git commit), Bash(git push), Bash(jq)
+allowed-tools: Bash, Write, Read
 ---
 
 # PR作業記録の生成とコミット
