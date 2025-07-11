@@ -64,7 +64,7 @@ Return a JSON object that matches the provided schema exactly. Be comprehensive 
 // Version history
 export const ANALYZE_REQUEST_PROMPT_VERSIONS = {
   'v1.0.0': {
-    date: '2025-01-11',
+    date: '2025-07-12',
     description: 'Initial version with comprehensive Dify workflow analysis patterns',
   },
 };
