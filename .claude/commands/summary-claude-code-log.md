@@ -1,6 +1,6 @@
 ---
 description: Claude Codeの作業記録を生成してPRにコミット
-allowed-tools: Bash(git diff), Bash(git log:*), Bash(git branch:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git config *), Bash(grep *), Bash(echo *), Bash(jq *), Bash(sort *), Bash(uniq *), Bash(head *), Bash(basename *), Bash(read *), Bash(test *), Bash([ *), Bash(npx *), Bash(cat *), Write, Read
+allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git config:*), Bash(grep:*), Bash(echo:*), Bash(jq:*), Bash(sort:*), Bash(uniq:*), Bash(head:*), Bash(basename:*), Bash(read:*), Bash(test:*), Bash([:*), Bash(npx:*), Bash(cat:*), Write, Read
 ---
 
 # Claude Codeの作業記録を生成してPRにコミット

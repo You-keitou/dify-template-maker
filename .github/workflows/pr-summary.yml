@@ -18,17 +18,17 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      
+          node-version: "20"
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 8
-      
+
       - name: Install dependencies
         run: pnpm install
       - name: Check for .claude-log/ changes
@@ -78,25 +78,25 @@ jobs:
           direct_prompt: |
             /project:summary-claude-code-log ${{ github.event.pull_request.number }}
           allowed_tools: |
-            Bash(git diff *),
-            Bash(git log *),
-            Bash(git branch *),
-            Bash(git add *),
-            Bash(git commit *),
-            Bash(git push *),
-            Bash(git config *),
-            Bash(grep *),
-            Bash(echo *),
-            Bash(jq *),
-            Bash(sort *),
-            Bash(uniq *),
-            Bash(head *),
-            Bash(basename *),
-            Bash(read *),
-            Bash(test *),
-            Bash([ *),
-            Bash(npm *),
-            Bash(npx *),
-            Bash(cat *),
+            Bash(git diff:*),
+            Bash(git log:*),
+            Bash(git branch:*),
+            Bash(git add:*),
+            Bash(git commit:*),
+            Bash(git push:*),
+            Bash(git config:*),
+            Bash(grep:*),
+            Bash(echo:*),
+            Bash(jq:*),
+            Bash(sort:*),
+            Bash(uniq:*),
+            Bash(head:*),
+            Bash(basename:*),
+            Bash(read:*),
+            Bash(test:*),
+            Bash([:*),
+            Bash(npm:*),
+            Bash(npx:*),
+            Bash(cat:*),
             Write,
             Read
