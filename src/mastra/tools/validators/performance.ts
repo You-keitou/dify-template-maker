@@ -138,7 +138,7 @@ function analyzeWorkflowComplexity(context: ValidationContext): void {
 }
 
 function detectParallelizationOpportunities(context: ValidationContext): void {
-  const edges = Array.from(context.edgeMap.values());
+  const _edges = Array.from(context.edgeMap.values());
   const independentNodes = findIndependentNodes(context);
 
   if (independentNodes.length > 1) {
@@ -230,7 +230,7 @@ function countMaxParallelBranches(context: ValidationContext): number {
   const edges = Array.from(context.edgeMap.values());
   let maxParallel = 0;
 
-  context.nodeMap.forEach((node, nodeId) => {
+  context.nodeMap.forEach((_node, nodeId) => {
     const outgoingEdges = edges.filter((edge) => edge.source === nodeId);
     if (outgoingEdges.length > 1) {
       maxParallel = Math.max(maxParallel, outgoingEdges.length);
@@ -265,7 +265,7 @@ function findIndependentNodes(context: ValidationContext): string[][] {
     const group: string[] = [];
 
     // 同じ依存関係を持つノードをグループ化
-    context.nodeMap.forEach((otherNode, otherNodeId) => {
+    context.nodeMap.forEach((_otherNode, otherNodeId) => {
       if (nodeId === otherNodeId || processed.has(otherNodeId)) return;
 
       const deps1 = dependencies.get(nodeId) || new Set();

@@ -6,7 +6,6 @@ import {
   type DifyDSL,
   type ValidationContext,
   type ValidationLevel,
-  ValidationResult,
   validateLogic,
   validatePerformance,
   validateSchema,

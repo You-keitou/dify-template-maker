@@ -1,12 +1,12 @@
-import { 
-  type DifyEdge, 
-  type DifyNode, 
-  NODE_TYPES, 
-  type ValidationContext,
-  VARIABLE_NAMESPACES,
-  SYSTEM_VARIABLES,
-  VARIABLE_PATTERN,
+import {
   type ConversationVariable,
+  type DifyEdge,
+  type DifyNode,
+  NODE_TYPES,
+  SYSTEM_VARIABLES,
+  VARIABLE_NAMESPACES,
+  VARIABLE_PATTERN,
+  type ValidationContext,
 } from './types';
 
 // ヘルパー関数：ノードの実際のタイプを取得
@@ -98,7 +98,8 @@ function validateNodeConnectivity(context: ValidationContext): void {
 
   // 孤立したノードを検出
   nodeIds.forEach((nodeId) => {
-    const node = context.nodeMap.get(nodeId)!;
+    const node = context.nodeMap.get(nodeId);
+    if (!node) return;
 
     if (!connectedNodes.has(nodeId) && node.type !== NODE_TYPES.START) {
       // custom-noteノードは意図的に孤立している（コメント機能）
@@ -134,14 +135,15 @@ function validateNodeConnectivity(context: ValidationContext): void {
 
   // 出力のないノード（endノード以外）を検出
   nodeIds.forEach((nodeId) => {
-    const node = context.nodeMap.get(nodeId)!;
+    const node = context.nodeMap.get(nodeId);
+    if (!node) return;
     const outgoingEdges = edges.filter((edge) => edge.source === nodeId);
 
     if (
       outgoingEdges.length === 0 &&
       node.type !== NODE_TYPES.END &&
       node.type !== NODE_TYPES.ANSWER &&
-      node.type !== NODE_TYPES.CUSTOM_NOTE  // コメントノードは出力がなくて正常
+      node.type !== NODE_TYPES.CUSTOM_NOTE // コメントノードは出力がなくて正常
     ) {
       context.issues.push({
         level: 'warning',
@@ -167,8 +169,8 @@ function findReachableNodes(context: ValidationContext): Set<string> {
   const queue = startNodes.map((node) => node.id);
 
   while (queue.length > 0) {
-    const nodeId = queue.shift()!;
-    if (reachable.has(nodeId)) continue;
+    const nodeId = queue.shift();
+    if (!nodeId || reachable.has(nodeId)) continue;
 
     reachable.add(nodeId);
 
@@ -230,7 +232,7 @@ function detectCycles(nodeMap: Map<string, DifyNode>, edges: DifyEdge[]): string
   }
 
   // 全てのノードからDFSを開始
-  nodeMap.forEach((node, nodeId) => {
+  nodeMap.forEach((_node, nodeId) => {
     if (!visited.has(nodeId)) {
       dfs(nodeId);
     }
@@ -295,10 +297,10 @@ function validateVariableReferences(context: ValidationContext): void {
     variables.forEach(({ variable, path }) => {
       // Cache check for performance
       const cacheKey = `${nodeId}:${variable}`;
-      if (context.variableValidationCache!.has(cacheKey)) {
+      if (context.variableValidationCache?.has(cacheKey)) {
         return;
       }
-      context.variableValidationCache!.set(cacheKey, true);
+      context.variableValidationCache?.set(cacheKey, true);
 
       // Split variable into parts for prefix-based dispatch
       const parts = variable.split('.');
@@ -321,11 +323,11 @@ function validateSystemVariable(
   context: ValidationContext,
   nodeId: string,
   variable: string,
-  path: string
+  path: string,
 ): void {
   const validSystemVars = Object.values(SYSTEM_VARIABLES);
-  
-  if (!validSystemVars.some(v => variable === v || variable.startsWith(v + '.'))) {
+
+  if (!validSystemVars.some((v) => variable === v || variable.startsWith(`${v}.`))) {
     context.issues.push({
       level: 'warning',
       path: `workflow.graph.nodes[${nodeId}].data${path}`,
@@ -339,7 +341,7 @@ function validateConversationVariable(
   context: ValidationContext,
   nodeId: string,
   variable: string,
-  path: string
+  path: string,
 ): void {
   const conversationVars = context.dsl.workflow?.conversation_variables || [];
   const varName = variable.split('.').slice(1).join('.');
@@ -352,7 +354,7 @@ function validateConversationVariable(
     if (v.selector && v.selector.join('.') === variable) return true;
     // Check if it's a nested property of a defined variable
     return conversationVars.some((cv: ConversationVariable) =>
-      variable.startsWith(`conversation.${cv.name}.`)
+      variable.startsWith(`conversation.${cv.name}.`),
     );
   });
 
@@ -371,14 +373,15 @@ function validateNodeVariable(
   nodeId: string,
   variable: string,
   path: string,
-  referencedNodeId: string
+  referencedNodeId: string,
 ): void {
   if (!context.nodeMap.has(referencedNodeId)) {
     // Provide suggestions for typos using simple string similarity
     const suggestions = findSimilarNodeIds(referencedNodeId, context.nodeMap);
-    const suggestionText = suggestions.length > 0
-      ? `もしかして: ${suggestions.join(', ')}`
-      : '参照先のノードIDを確認してください';
+    const suggestionText =
+      suggestions.length > 0
+        ? `もしかして: ${suggestions.join(', ')}`
+        : '参照先のノードIDを確認してください';
 
     context.issues.push({
       level: 'error',
@@ -404,7 +407,7 @@ function findSimilarNodeIds(target: string, nodeMap: Map<string, DifyNode>): str
   const nodeIds = Array.from(nodeMap.keys());
   const suggestions: Array<{ id: string; distance: number }> = [];
 
-  nodeIds.forEach(id => {
+  nodeIds.forEach((id) => {
     const distance = levenshteinDistance(target, id);
     if (distance <= 2 && distance > 0) {
       suggestions.push({ id, distance });
@@ -414,7 +417,7 @@ function findSimilarNodeIds(target: string, nodeMap: Map<string, DifyNode>): str
   return suggestions
     .sort((a, b) => a.distance - b.distance)
     .slice(0, 3)
-    .map(s => s.id);
+    .map((s) => s.id);
 }
 
 // Simple Levenshtein distance implementation
@@ -436,8 +439,8 @@ function levenshteinDistance(a: string, b: string): number {
       } else {
         matrix[i][j] = Math.min(
           matrix[i - 1][j - 1] + 1, // substitution
-          matrix[i][j - 1] + 1,     // insertion
-          matrix[i - 1][j] + 1      // deletion
+          matrix[i][j - 1] + 1, // insertion
+          matrix[i - 1][j] + 1, // deletion
         );
       }
     }
@@ -446,13 +449,13 @@ function levenshteinDistance(a: string, b: string): number {
   return matrix[b.length][a.length];
 }
 
-function extractVariables(obj: any, currentPath = ''): Array<{ variable: string; path: string }> {
+function extractVariables(obj: unknown, currentPath = ''): Array<{ variable: string; path: string }> {
   const results: Array<{ variable: string; path: string }> = [];
   // Use the authoritative pattern from types
   const variablePattern = new RegExp(VARIABLE_PATTERN.source, 'g');
 
   if (typeof obj === 'string') {
-    let match;
+    let match: RegExpExecArray | null;
     while ((match = variablePattern.exec(obj)) !== null) {
       results.push({
         variable: match[1],
@@ -483,7 +486,8 @@ function isNodeExecutedBefore(
   const queue = [beforeNodeId];
 
   while (queue.length > 0) {
-    const nodeId = queue.shift()!;
+    const nodeId = queue.shift();
+    if (!nodeId) continue;
     if (nodeId === afterNodeId) {
       return true;
     }

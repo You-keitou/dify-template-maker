@@ -35,9 +35,9 @@ export interface DifyDSL {
       nodes: DifyNode[];
       edges: DifyEdge[];
     };
-    features?: Record<string, any>;
-    environment_variables?: any[];
-    conversation_variables?: any[];
+    features?: Record<string, unknown>;
+    environment_variables?: Array<Record<string, unknown>>;
+    conversation_variables?: ConversationVariable[];
     hash?: string;
   };
 }
@@ -49,7 +49,7 @@ export interface DifyNode {
     x: number;
     y: number;
   };
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 export interface DifyEdge {
@@ -59,13 +59,13 @@ export interface DifyEdge {
   sourceHandle?: string;
   targetHandle?: string;
   type?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 export interface NodeTypeValidation {
   required: string[];
   optional?: string[];
-  validations?: Record<string, any>;
+  validations?: Record<string, unknown>;
 }
 
 export const NODE_TYPES = {
@@ -139,18 +139,20 @@ export const CONVERSATION_VARIABLE_TYPES = {
   ARRAY_OBJECT: 'array[object]',
 } as const;
 
-export type ConversationVariableType = (typeof CONVERSATION_VARIABLE_TYPES)[keyof typeof CONVERSATION_VARIABLE_TYPES];
+export type ConversationVariableType =
+  (typeof CONVERSATION_VARIABLE_TYPES)[keyof typeof CONVERSATION_VARIABLE_TYPES];
 
 export interface ConversationVariable {
   name: string;
   value_type: ConversationVariableType;
   description?: string;
   selector?: string[];
-  value?: any;
+  value?: unknown;
 }
 
 // Variable reference pattern as per Dify specification
-export const VARIABLE_PATTERN = /\{\{#([a-zA-Z0-9_]{1,50}(?:\.[a-zA-Z_][a-zA-Z0-9_]{0,29}){1,10})#\}\}/g;
+export const VARIABLE_PATTERN =
+  /\{\{#([a-zA-Z0-9_]{1,50}(?:\.[a-zA-Z_][a-zA-Z0-9_]{0,29}){1,10})#\}\}/g;
 
 // Special node IDs for variable namespaces
 export const VARIABLE_NAMESPACES = {

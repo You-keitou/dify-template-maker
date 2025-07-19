@@ -1,14 +1,11 @@
-import yaml from 'js-yaml';
 import {
   CURRENT_DSL_VERSION,
-  DifyDSL,
   EDGE_TYPES,
   type EdgeType,
   NODE_TYPES,
   type NodeType,
   type NodeTypeValidation,
   type ValidationContext,
-  ValidationIssue,
 } from './types';
 
 const NODE_VALIDATIONS: Record<NodeType, NodeTypeValidation> = {

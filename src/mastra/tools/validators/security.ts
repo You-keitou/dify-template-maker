@@ -74,7 +74,7 @@ function validateHTTPSecurity(context: ValidationContext, node: any, nodeId: str
           suggestion: '本番環境では実際のAPIエンドポイントを使用してください',
         });
       }
-    } catch (e) {
+    } catch (_e) {
       // URLパースエラーは schema.ts で処理済み
     }
   }
