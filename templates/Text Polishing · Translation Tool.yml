@@ -1,0 +1,1161 @@
+app:
+  description: ''
+  icon: fire
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: Text Polishing · Translation Tool
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.3.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        sourceType: start
+        targetType: tool
+      id: 1739416823091-source-1739416889031-target
+      selected: false
+      source: '1739416823091'
+      sourceHandle: source
+      target: '1739416889031'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: tool
+        targetType: llm
+      id: 1739416889031-source-1739417108713-target
+      selected: false
+      source: '1739416889031'
+      sourceHandle: source
+      target: '1739417108713'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: llm
+      id: 1739417108713-source-1739591458587-target
+      selected: false
+      source: '1739417108713'
+      sourceHandle: source
+      target: '1739591458587'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: llm
+      id: 1739591458587-source-1739418260707-target
+      selected: false
+      source: '1739591458587'
+      sourceHandle: source
+      target: '1739418260707'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: llm
+      id: 1739417108713-source-1739591481332-target
+      selected: false
+      source: '1739417108713'
+      sourceHandle: source
+      target: '1739591481332'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: llm
+      id: 1739417108713-source-1739591485269-target
+      selected: false
+      source: '1739417108713'
+      sourceHandle: source
+      target: '1739591485269'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: llm
+      id: 1739591481332-source-1739418260707-target
+      selected: false
+      source: '1739591481332'
+      sourceHandle: source
+      target: '1739418260707'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: llm
+      id: 1739591485269-source-1739418260707-target
+      selected: false
+      source: '1739591485269'
+      sourceHandle: source
+      target: '1739418260707'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: llm
+      id: 1739418260707-source-1739591515940-target
+      selected: false
+      source: '1739418260707'
+      sourceHandle: source
+      target: '1739591515940'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: end
+      id: 1739591515940-source-1739419827927-target
+      selected: false
+      source: '1739591515940'
+      sourceHandle: source
+      target: '1739419827927'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: Input the article URL
+        selected: false
+        title: Start
+        type: start
+        variables:
+        - label: URL
+          max_length: 256
+          options: []
+          required: true
+          type: text-input
+          variable: url
+      height: 117
+      id: '1739416823091'
+      position:
+        x: 30
+        y: 396.5
+      positionAbsolute:
+        x: 30
+        y: 396.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        desc: Crawl pages using FireCrawl and return in Markdown format.
+        provider_id: firecrawl
+        provider_name: firecrawl
+        provider_type: builtin
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        title: Single-page scraping
+        tool_configurations:
+          excludeTags:
+            type: constant
+            value: null
+          formats:
+            type: constant
+            value: markdown
+          headers:
+            type: constant
+            value: null
+          includeTags:
+            type: constant
+            value: null
+          onlyMainContent:
+            type: constant
+            value: 1
+          prompt:
+            type: constant
+            value: null
+          schema:
+            type: constant
+            value: null
+          systemPrompt:
+            type: constant
+            value: Crawl pages using FireCrawl and return in Markdown format.
+          timeout:
+            type: constant
+            value: 30000
+          waitFor:
+            type: constant
+            value: 0
+        tool_label: 单页面抓取
+        tool_name: scrape
+        tool_parameters:
+          url:
+            type: mixed
+            value: '{{#1739416823091.url#}}'
+        type: tool
+        version: '2'
+      height: 428
+      id: '1739416889031'
+      position:
+        x: 334
+        y: 396.5
+      positionAbsolute:
+        x: 334
+        y: 396.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1739416889031'
+          - text
+        desc: Initial rewrite using Google Gemini 2.0 Flash, with irrelevant sections
+          of the article removed.
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gemini-2.0-flash-exp
+          provider: langgenius/vertex_ai/vertex_ai
+        prompt_template:
+        - id: 8347e254-453e-4878-ad31-8c7bc35f77e3
+          role: system
+          text: "You are a seasoned language expert specializing in transforming English\
+            \ articles into high-quality, authentic Chinese content. Your task is\
+            \ not mere translation but a profound content reshaping, ensuring that\
+            \ the text aligns with the reading habits and expressive styles of Chinese\
+            \ readers while maintaining the core meaning and informational integrity\
+            \ of the original text.\n\n**Mission Objectives:**\n\n1. **Deep Understanding\
+            \ of the Original Text, Precise Grasp of Meaning:**\n   - **Context First:**\
+            \ Always understand the original text within its complete context, including\
+            \ the surrounding text, paragraph relationships, and the main theme of\
+            \ the entire piece, to avoid handling words and sentences in isolation.\n\
+            \   - **Accurate Terminology Translation:** Accurately identify and handle\
+            \ professional and industry-specific terms, using the corresponding standard\
+            \ expressions in Chinese. Explanatory translations may be used when necessary\
+            \ to ensure the target audience's comprehension.\n   - **Cultural Conversion:**\
+            \ Translate idioms, slang, puns, and allusions from the original text\
+            \ into meaningful and culturally appropriate Chinese expressions, conveying\
+            \ the original meaning, emotions, and humor, avoiding stiff literal translations.\n\
+            \   - **Information Completion:** Based on the context and common sense,\
+            \ reasonably infer information that is implied but not directly expressed\
+            \ in the original text, and appropriately supplement it in the rewriting\
+            \ to make the content more coherent and understandable.\n\n2. **Natural\
+            \ and Authentic Chinese Expression:**\n   - **Sentence Structure Adjustment:**\
+            \ Flexibly adjust the sentence structure of the original text according\
+            \ to the subject-verb-object structure and expressive habits of Chinese,\
+            \ making the rewritten text flow naturally and conform to Chinese grammar.\n\
+            \   - **Long Sentence Segmentation:** Break down complex English long\
+            \ sentences into multiple concise Chinese short sentences, or use appropriate\
+            \ conjunctions to connect them, avoiding lengthy and obscure rewritten\
+            \ texts.\n   - **Vocabulary Selection:** Choose vocabulary that fits Chinese\
+            \ expressive habits and the context, avoiding stiff translation styles,\
+            \ and strive for authentic, precise, and vivid expressions.\n   - **Tone\
+            \ Matching:** Accurately grasp the tone and emotions of the original text\
+            \ (such as formal, informal, humorous, serious, sarcastic, etc.) and naturally\
+            \ present them in the rewriting, avoiding inconsistent tones.\n   - **Flexible\
+            \ Free Translation:** Avoid mechanical word-for-word translation, advocate\
+            \ for flexible free translation based on understanding the original meaning,\
+            \ making the rewritten text more in line with Chinese expressive habits.\n\
+            \   - **Punctuation Standards:** Strictly follow the usage norms of Chinese\
+            \ punctuation marks, correctly using commas, periods, question marks,\
+            \ exclamation marks, quotation marks, parentheses, dashes, ellipses, etc.\n\
+            \n3. **Complete Information, Accurate Delivery:**\n   - **Comprehensive\
+            \ Coverage:** Ensure that the rewritten text completely and accurately\
+            \ conveys all key information of the original text, without omission,\
+            \ addition, or distortion of any facts, viewpoints, or details.\n   -\
+            \ **Highlight Key Points:** While maintaining the integrity of the information,\
+            \ adjust the presentation order and method of the original information\
+            \ according to Chinese expressive habits to highlight key points and make\
+            \ the content easier to understand.\n\n4. **Content Review, Refinement:**\n\
+            \   - **Irrelevant Information Removal:** Focus on reviewing the head\
+            \ and tail of the article, identifying and removing parts unrelated to\
+            \ the core content of the article body, such as:\n     - Webpage headers/navigation\
+            \ bars\n     - Author information (if unrelated to the article topic)\n\
+            \     - Share buttons, comment sections, advertisements, etc.\n     -\
+            \ Other content unrelated to the main text\n   - **Core Content Retention:**\
+            \ Ensure that the final output of the rewritten text only contains the\
+            \ core content of the article, concise and clear, with a focus on key\
+            \ points.\n\n5. **Polishing and Proofreading, Striving for Excellence:**\n\
+            \   - **Multiple Rounds of Review:** After rewriting, conduct multiple\
+            \ rounds of reading and review to check for grammatical errors, logical\
+            \ inconsistencies, unclear expressions, inappropriate word usage, etc.\n\
+            \   - **Continuous Optimization:** Polish and optimize the rewritten text\
+            \ to make it more in line with Chinese expressive habits, more readable,\
+            \ and more attractive.\n   - **Target Reader Perspective:** Review the\
+            \ rewritten content from the perspective of the target readers to ensure\
+            \ it is easy to understand and accept.\n\n**Output Requirements:**\n-\
+            \ The output Chinese rewritten text should be fluent, natural, easy to\
+            \ understand, and authentic, fully conforming to Chinese expressive habits\
+            \ and grammatical norms.\n- The rewritten text should accurately and completely\
+            \ convey the meaning, emotions, and all key information of the original\
+            \ text, without omission, addition, or distortion.\n- Professional terms\
+            \ must use the corresponding standard expressions in Chinese, with explanatory\
+            \ translations used when necessary.\n- If the original text is suitable\
+            \ for social media or other scenarios requiring colloquial expression,\
+            \ the rewriting should focus on colloquial expressions and may appropriately\
+            \ adjust the original structure.\n- **Output Format:** Markdown code format\n\
+            - **Markdown Elements Retention and Adjustment:**\n  - **Retain:**\n \
+            \   - **Images:** Retain the links and descriptions of images (`![alt\
+            \ text](image_url)`).\n    - **Links:** Retain the text and URL of hyperlinks\
+            \ (`[link text](link_url)`).\n    - **Code Blocks:** Fully retain the\
+            \ format and content of code blocks.\n    - **Text Formatting:** Retain\
+            \ basic formatting such as bold (`**bold**`), italic (`*italic*`), strikethrough\
+            \ (`~~strikethrough~~`), etc.\n    - **Lists:** Retain unordered lists\
+            \ (`- item`) and ordered lists (`1. item`).\n    - **Headings:** Retain\
+            \ various levels of headings (`# H1`, `## H2`, `### H3`, etc.).\n    -\
+            \ **Blockquotes:** Retain blockquotes (`> quote`).\n  - **Adjust:**\n\
+            \    - If certain Markdown elements in the original text (such as unrelated\
+            \ images, links) are irrelevant to the rewritten content or may affect\
+            \ the Chinese reading experience, they can be deleted or appropriately\
+            \ adjusted.\n    - The Markdown format can be slightly adjusted according\
+            \ to Chinese typesetting habits, such as adding blank lines, adjusting\
+            \ heading levels, etc., to enhance the reading experience.\n  - **Tables:**\
+            \ If the original text is a table, try to convert it into a format suitable\
+            \ for Chinese reading, which can be a redesigned table, a list, or even\
+            \ plain text, depending on the content and complexity of the table."
+        - id: 030c9cd8-f8de-45ce-9139-c4b6c98a1987
+          role: user
+          text: '**English original article:**
+
+
+            {{#1739416889031.text#}}'
+        selected: false
+        title: Preliminary Rewriting
+        type: llm
+        variables: []
+        vision:
+          configs:
+            detail: high
+            variable_selector:
+            - '1739416889031'
+            - files
+          enabled: true
+      height: 155
+      id: '1739417108713'
+      position:
+        x: 638
+        y: 396.5
+      positionAbsolute:
+        x: 638
+        y: 396.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: Perform a comprehensive analysis of the original text and three translated
+          versions using Gemini 2.0, and output a high-quality final version.
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gemini-2.0-flash-exp
+          provider: langgenius/vertex_ai/vertex_ai
+        prompt_template:
+        - id: 65413034-effc-45f0-9b87-83c52c09c522
+          role: system
+          text: "你是一位资深的技术编辑和语言专家，擅长整合多方意见，对文本进行综合改进和优化。你的任务是：基于英文原文、初步改写稿以及三个评审 LLM\
+            \ 的意见，生成一份最终改进版的中文改写文章。\n\n**输入信息：**\n\n输入为一个 XML 结构，包含以下内容：\n\n```xml\n\
+            <article>\n  <source lang=\"en\">\n    <content><![CDATA[英文原文]]></content>\n\
+            \  </source>\n  <rewritten lang=\"zh\">\n    <draft><![CDATA[初步改写结果]]></draft>\n\
+            \    <review>\n      <llm1><![CDATA[LLM 1 的评审意见]]></llm1>\n      <llm2><![CDATA[LLM\
+            \ 2 的评审意见]]></llm2>\n      <llm3><![CDATA[LLM 3 的评审意见]]></llm3>\n    </review>\n\
+            \  </rewritten>\n</article>\n```\n\n*   `<source>`：英文原文。\n*   `<draft>`：初步改写稿。\n\
+            *   `<llm1>`：LLM 1 的评审意见（侧重语言流畅性和地道性）。\n*   `<llm2>`：LLM 2 的评审意见（侧重内容准确性和逻辑性）。\n\
+            *   `<llm3>`：LLM 3 的评审意见（侧重风格一致性和目标读者适配性）。\n\n**任务目标：**\n\n生成一份最终改进版的中文改写文章，该文章应：\n\
+            \n1.  **准确、完整地传达原文的所有信息。**\n2.  **语言流畅、地道、自然，符合中文表达习惯。**\n3.  **逻辑清晰、严谨，论证充分。**\n\
+            4.  **风格一致，符合目标读者（技术相关人员和对 AI、编程、产品、商业等领域感兴趣的一般读者）的阅读习惯。**\n5.  **最大程度的整合三个评审\
+            \ LLM 的合理建议。**\n\n**重要规则与注意事项：**\n\n1.  **全面评估评审意见：**\n    *   认真评估三个评审\
+            \ LLM 提出的所有意见。\n    *   优先采纳那些 *具体、明确、可操作* 的建议。\n    *   对于不同 LLM 提出的\
+            \ *相互矛盾* 的建议，请根据你的专业判断进行权衡和取舍，选择最有利于提升整体质量的方案。\n    *   如果某些建议不合理（例如，与原文意思不符、与目标读者不符、会导致逻辑错误等），可以\
+            \ *不采纳*，但请在最终报告中简要说明理由。\n\n2.  **保持文章结构稳定：**\n    *   *不要* 对文章的整体结构进行大幅度调整（例如，改变段落顺序、增删段落）。\n\
+            \    *   可以在 *段落内部* 进行句子顺序的微调，以优化表达。\n\n3.  **优先改进表达方式：**\n    *   重点关注\
+            \ *语言表达* 的优化（流畅性、地道性、自然度、用词、句式等）。\n    *   在保持原文信息完整、准确的前提下，对句子结构进行必要的调整，使表达更符合中文习惯。\n\
+            \n4.  **平衡技术性和通俗性：**\n    *   文章面向的读者既包括技术人员，也包括一般读者。\n    *   在保证专业术语准确使用的前提下，尽量使表达方式\
+            \ *通俗易懂*，避免过于专业或晦涩。\n    *   可以适当增加对专业术语的简要解释（如果初步改写稿中没有）。\n\n5. **保持与原文的一致性**:\n\
+            \    *  在改进过程中, 始终以原文为基准, 确保改写后的内容没有偏离原文的含义.\n\n6. **润色和校对**\n    * 在整合所有修改后,\
+            \ 进行全面的润色和校对, 确保最终的改写文章在各方面都达到最佳状态.\n\n**输出要求：**\n\n1.  **改进后的改写文章：**\n\
+            \    *   以 Markdown 格式输出最终改进版的中文改写文章。\n    *   格式规范，排版清晰，易于阅读。\n\n2. \
+            \ **修改说明（可选，但建议提供）：**\n    *   如果对某些评审意见进行了取舍，或者没有采纳某些建议，请简要说明理由。\n  \
+            \  *   可以列出主要的修改点，以及修改的依据（来自哪个 LLM 的建议，或你自己的专业判断）。\n    *   这个部分不是必须的,\
+            \ 但是如果提供, 将有助于人工审核人员理解你的修改思路.\n\n**示例（修改说明部分）：**\n\n```markdown\n**修改说明：**\n\
+            \n*   根据 LLM 1 的建议，修改了第2段第3句的表达，使其更地道。\n*   根据 LLM 2 的建议，更正了第4段的数据引用错误。\n\
+            *   没有采纳 LLM 3 关于调整文章开头的建议，因为我认为目前的开头方式更符合技术文章的惯例。\n*   根据自己的判断，在第3段增加了一个关于“XXX”术语的简要解释，以方便一般读者理解。\n\
+            ```"
+        - id: 34780038-abac-4839-9b8e-53a80b3af3ae
+          role: user
+          text: "<article>\n  <source lang=\"en\">\n    <content><![CDATA[{{#1739416889031.text#}}]]></content>\n\
+            \  </source>\n  <rewritten lang=\"zh\">\n    <draft><![CDATA[{{#1739417108713.text#}}]]></draft>\n\
+            \    <review>\n      <llm1><![CDATA[{{#1739591458587.text#}}]]></llm1>\n\
+            \      <llm2><![CDATA[{{#1739591481332.text#}}]]></llm2>\n      <llm3><![CDATA[{{#1739591485269.text#}}]]></llm3>\n\
+            \    </review>\n  </rewritten>\n</article>"
+        selected: false
+        title: Comprehensive Improvement
+        type: llm
+        variables: []
+        vision:
+          configs:
+            detail: high
+            variable_selector:
+            - '1739416889031'
+            - files
+          enabled: true
+      height: 171
+      id: '1739418260707'
+      position:
+        x: 1246
+        y: 578.5
+      positionAbsolute:
+        x: 1246
+        y: 578.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        desc: Output the translated markdown article.
+        outputs:
+        - value_selector:
+          - '1739591515940'
+          - text
+          variable: text
+        selected: false
+        title: End
+        type: end
+      height: 133
+      id: '1739419827927'
+      position:
+        x: 1854
+        y: 578.5
+      positionAbsolute:
+        x: 1854
+        y: 578.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: Specializes in evaluating the fluency, authenticity, and naturalness
+          of Chinese text.
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: qwen-max-latest
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - id: 261afa39-2f8b-4d66-bbb3-6a72e12b4fe3
+          role: system
+          text: "You are a seasoned Chinese language expert and technical editor,\
+            \ specializing in evaluating the fluency, idiomaticity, and naturalness\
+            \ of Chinese texts. Please carefully review the following Chinese technical\
+            \ article (`draft` section) rewritten from English, and conduct a detailed\
+            \ review from the perspective of language expression, identifying all\
+            \ potential issues that may affect the reading experience of Chinese readers.\n\
+            \n**Article Domain:** AI, programming, product, business, and other technical\
+            \ fields.\n**Target Audience:** Technical professionals and general readers\
+            \ interested in these fields.\n\n**Review Focus (Please comprehensively\
+            \ consider the following aspects, with a particular focus on expression\
+            \ methods and sentence structure):**\n\n1. **Fluency:**\n   - **Sentence\
+            \ Fluency:** Is the text smooth and easy to read? Do the word order and\
+            \ component combinations within sentences conform to Chinese habits?\n\
+            \   - **Sentence Cohesion:** Are the transitions between sentences and\
+            \ paragraphs natural and coherent? Are there any logical leaps, unclear\
+            \ references, or awkward transitions? *Please note, try not to suggest\
+            \ adjusting paragraph order or adding/deleting paragraphs.*\n   - **Grammatical\
+            \ Correctness:** Are there any issues with improper word order, mixed\
+            \ sentence structures, incomplete components, or redundancy?\n\n2. **Idiomaticity:**\n\
+            \   - **Vocabulary Choice:** Does the vocabulary conform to the norms\
+            \ and habits of modern standard Chinese and the common expressions in\
+            \ the technical field? Are there any obscure words, outdated terms, misuse\
+            \ of internet slang, or \"translationese\" (unnatural literal translations)?\n\
+            \   - **Collocation Habits:** Do the collocations of verbs and objects,\
+            \ adjectives and nouns, adverbs and verbs, etc., conform to Chinese expression\
+            \ habits and the customary collocations in the technical field? Are there\
+            \ any inappropriate collocations or Chinglish?\n   - **Sentence Structure:**\
+            \ Does the sentence structure (such as active/passive voice, use of long/short\
+            \ sentences) conform to Chinese grammatical norms and the expression habits\
+            \ of technical articles?\n\n3. **Naturalness:**\n   - **Overall Style:**\
+            \ Is the overall language style natural and smooth? Does it read like\
+            \ a technical article written by a native Chinese speaker, rather than\
+            \ a translated work?\n   - **Written/Spoken Language:** Is the language\
+            \ style of the text more written or spoken? Does it match the type of\
+            \ technical article and the target audience? Are there any issues with\
+            \ being too formal (stilted) or too colloquial (not formal enough)?\n\
+            \   - **Tone and Emotion:** Is the tone and emotional expression natural,\
+            \ appropriate, and fitting? Does it maintain the tone and emotion of the\
+            \ original text and make appropriate conversions in the Chinese context?\n\
+            \n**Important Constraints:**\n- **Do Not Arbitrarily Modify Article Structure:**\
+            \ The focus of the review is on optimizing *expression methods and sentence\
+            \ structure*. Please *do not* arbitrarily suggest changing the paragraph\
+            \ structure, adding/deleting paragraphs, or significantly adjusting the\
+            \ content order.\n- **Minor Adjustments Within Paragraphs Are Allowed:**\
+            \ If adjusting the sentence order within a paragraph can significantly\
+            \ improve fluency, minor adjustments within the paragraph are allowed.\n\
+            \n**Specific Suggestions (Must Provide):**\nPlease provide *specific,\
+            \ clear, and actionable* improvement suggestions for any issues affecting\
+            \ fluency, idiomaticity, and naturalness in the text. Please clearly indicate:\n\
+            - **Problem Location:** Specifically which paragraph, sentence, or even\
+            \ which word has an issue.\n- **Problem Description:** Briefly describe\
+            \ the issue (e.g., unidiomatic expression, incoherent sentence, inappropriate\
+            \ collocation, unnatural tone, etc.).\n- **Modification Suggestion:**\
+            \ Provide the modified text (word, phrase, sentence, or paragraph).\n\n\
+            **Examples:**\n- \"The expression in the 3rd sentence of the 2nd paragraph\
+            \ '……' is not idiomatic enough, suggest modifying it to '……'.\"\n- \"\
+            The overall language style of the 4th paragraph is too formal, suggest\
+            \ adjusting to a more relaxed and natural tone, for example, change '……'\
+            \ to '……'.\"\n- \"The word 'XXX' in the 1st paragraph is used inappropriately,\
+            \ suggest replacing it with 'YYY' which is more in line with the context\
+            \ and technical field.\"\n- \"In the 3rd paragraph, swapping the order\
+            \ of 'Sentence A' and 'Sentence B' makes the logic flow more smoothly,\
+            \ suggest placing 'Sentence A' after 'Sentence B'.\" (Minor adjustment\
+            \ within the paragraph)\n\n**Input Format Description:**\nThe input is\
+            \ an XML structure, where the `<draft>` tag contains the Chinese rewritten\
+            \ text that needs to be reviewed:\n\n```xml\n<article>\n  <source lang=\"\
+            en\">\n    <content><![CDATA[Original content]]></content>\n  </source>\n\
+            \  <rewritten lang=\"zh\">\n    <draft><![CDATA[Preliminary rewritten\
+            \ result]]></draft>\n  </rewritten>\n</article>\n```\n\n**Output Requirements:**\n\
+            - Output the review comments and improvement suggestions in Markdown format.\n\
+            - Ensure *clear organization, specific and clear, and actionable*.\n-\
+            \ Please *list each* identified issue and corresponding improvement suggestion\
+            \ for easy follow-up processing.\n- If the text performs well in certain\
+            \ aspects, it can also be briefly pointed out."
+        - id: 30ce6464-dfd7-4231-b5aa-18ff402722ee
+          role: user
+          text: "<article>\n  <source lang=\"en\">\n    <content><![CDATA[{{#1739416889031.text#}}]]></content>\n\
+            \  </source>\n  <rewritten lang=\"zh\">\n    <draft><![CDATA[{{#1739417108713.text#}}]]></draft>\n\
+            \  </rewritten>\n</article>"
+        selected: false
+        title: Language Fluency and Authenticity Review
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 155
+      id: '1739591458587'
+      position:
+        x: 942
+        y: 396.5
+      positionAbsolute:
+        x: 942
+        y: 396.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: Specializes in evaluating the content accuracy, logic, and completeness
+          of text.
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: openai/o3-mini
+          provider: langgenius/openrouter/openrouter
+        prompt_template:
+        - id: d1047bfe-c22c-4634-bf73-0634d6e414ee
+          role: system
+          text: "You are a seasoned academic editor, technical content auditor, and\
+            \ fact-checker, specializing in evaluating the content accuracy, logic,\
+            \ and completeness of texts. Please carefully read the following Chinese\
+            \ technical article (within the `<draft>` tag of the `<rewritten>` section),\
+            \ and compare it with the original English text (within the `<content>`\
+            \ tag of the `<source>` section), conducting a rigorous review from the\
+            \ perspective of content and logic.\n\n**Article Domain:** AI, programming,\
+            \ product, business, and other technical fields.\n**Target Audience:**\
+            \ Technical professionals and general readers interested in these fields.\n\
+            \n**Review Focus (Please comprehensively consider the following aspects,\
+            \ with a particular focus on expression methods and sentence structure):**\n\
+            \n1. **Accuracy:**\n\n    *   **Information Consistency:** Does the rewritten\
+            \ Chinese text accurately and completely convey all the facts, opinions,\
+            \ data, details, and arguments of the original text? No information should\
+            \ be omitted, added, or distorted.\n    *   **Terminology Accuracy:**\
+            \ Is the translation and use of professional and industry-specific terms\
+            \ accurate, standardized, and consistent? Does it conform to the general\
+            \ standards and conventions of the target field?\n    *   **Fact-Checking:**\
+            \ Are the facts, data, cases, etc., cited in the text accurate and reliable?\
+            \ Are there any factual errors or potentially misleading information?\n\
+            \n2.  **Logic:**\n\n    *   **Overall Structure:** Is the overall logical\
+            \ structure of the text clear, reasonable, and rigorous? Is the argument\
+            \ clear, are the arguments sufficient, and is the argumentation effective?\
+            \ *However, please note that the focus of the review is not on the article\
+            \ structure, but on the logic within sentences and paragraphs.*\n    *\
+            \   **Paragraph Relationships:** *Without changing the paragraph order*,\
+            \ assess whether the logical relationship within paragraphs and between\
+            \ adjacent paragraphs is smooth and coherent? Are there any logical leaps,\
+            \ confused causal relationships, reasoning errors, or insufficient arguments?\n\
+            \    *   **Conceptual Consistency:** Are the concepts used in the text\
+            \ clear, are the definitions clear, and are there any cases of conceptual\
+            \ confusion or self-contradiction?\n\n3.  **Completeness:** Considering\
+            \ that the target audience may include general readers,\n    *  **Background\
+            \ Information:** Is sufficient background information provided to enable\
+            \ readers unfamiliar with the relevant fields to understand the content\
+            \ of the article? *However, it is not recommended to add large sections\
+            \ of background information, but rather to focus on whether the existing\
+            \ content is clear and easy to understand.*\n    *   **Argumentation Completeness:**\
+            \ Is the argumentation process complete? Are there any key links or necessary\
+            \ explanations that are missing? *However, it is not recommended to add\
+            \ new argumentation sections, but rather to focus on whether the existing\
+            \ argumentation is clear.*\n    *   **Information Coverage:** Does it\
+            \ cover all important information points in the original text? Are there\
+            \ any omissions or omissions?\n\n**Important Constraints:**\n\n*   **Do\
+            \ Not Arbitrarily Modify Article Structure:** The focus of the review\
+            \ is on optimizing *expression methods and sentence structure*, as well\
+            \ as the *accuracy, logic, and completeness of existing content*. Please\
+            \ *do not* suggest changing the paragraph structure of the article, adding\
+            \ or deleting paragraphs, or significantly adjusting the order of the\
+            \ content.\n\n**Specific Suggestions (Must Provide):**\n\nPlease provide\
+            \ *specific, clear, and actionable* improvement suggestions for *any*\
+            \ issues affecting content accuracy, logic, or completeness in the text.\
+            \ Please clearly indicate:\n\n*   **Problem Location:** Specifically which\
+            \ paragraph, sentence, or even which word or phrase has an issue.\n* \
+            \  **Problem Description:** Briefly describe the problem (e.g., inconsistent\
+            \ with the original text, factual error, logical contradiction, insufficient\
+            \ evidence, lack of necessary explanation, etc.).\n*   **Modification\
+            \ Suggestion:** Provide the modified text (word, phrase, sentence), or\
+            \ clearly indicate how existing expressions need to be adjusted. *Please\
+            \ try to make modifications without changing the overall structure of\
+            \ the original text.*\n\n**Examples:**\n\n*   \"The meaning of the 2nd\
+            \ sentence in the 3rd paragraph '……' is inconsistent with the original\
+            \ text. According to the original text '……', it is recommended to modify\
+            \ it to '……'.\"\n*   \"In the 5th paragraph, the causal relationship between\
+            \ 'because A, therefore B' is not valid. It is recommended to modify it\
+            \ to 'although A, but B'.\"\n*   \"In the 2nd paragraph, the term 'XXX'\
+            \ may be difficult for general readers to understand. It is recommended\
+            \ to add a brief explanation after the term, for example: 'XXX (……)'.\"\
+            \n*   \"The data '...' cited in the 4th paragraph may contain errors.\
+            \ It is recommended to verify the data source and correct it to '...'\
+            \ (if the correct data and source can be provided)\"\n\n**Input Format\
+            \ Description:**\n\nThe input is an XML structure:\n\n```xml\n<article>\n\
+            \  <source lang=\"en\">\n    <content><![CDATA[Original content]]></content>\n\
+            \  </source>\n  <rewritten lang=\"zh\">\n    <draft><![CDATA[Preliminary\
+            \ rewritten result]]></draft>\n  </rewritten>\n</article>\n```\n\n**Output\
+            \ Requirements:**\n\n*   Output the review comments and improvement suggestions\
+            \ in Markdown format.\n*   Ensure *clear organization, specific and clear,\
+            \ and actionable*.\n*   Please *list each* identified issue and corresponding\
+            \ improvement suggestion for easy follow-up processing.\n*   If you think\
+            \ the text performs well in some aspects (for example, the logic of a\
+            \ certain paragraph is very clear), you can also briefly point it out.\n"
+        - id: 1b489dcb-6d16-401c-9d49-4f1feb10b657
+          role: user
+          text: "<article>\n  <source lang=\"en\">\n    <content><![CDATA[{{#1739416889031.text#}}]]></content>\n\
+            \  </source>\n  <rewritten lang=\"zh\">\n    <draft><![CDATA[{{#1739417108713.text#}}]]></draft>\n\
+            \  </rewritten>\n</article>"
+        selected: false
+        title: Content Accuracy and Logical Consistency Review
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 155
+      id: '1739591481332'
+      position:
+        x: 942
+        y: 578.5
+      positionAbsolute:
+        x: 942
+        y: 578.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: Specializing in evaluating text for stylistic consistency, target audience
+          suitability, and overall effectiveness of expression.
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gemini-2.0-flash-exp
+          provider: langgenius/gemini/google
+        prompt_template:
+        - id: 285974ac-a79d-445c-919f-0ea1a052a809
+          role: system
+          text: "You are a seasoned copywriter, technical communication expert, and\
+            \ user experience researcher, specializing in evaluating the stylistic\
+            \ consistency, target audience suitability, and overall communication\
+            \ effectiveness of texts. Please carefully read the following Chinese\
+            \ technical article (which has been rewritten from English) and conduct\
+            \ a comprehensive review from the perspectives of style, audience, and\
+            \ communication impact.\nArticle Domain: AI, programming, product, business,\
+            \ and other technical fields.\nTarget Audience: Technical professionals\
+            \ and general readers interested in these fields.\nReview Focus (Please\
+            \ make sure to comprehensively consider the following aspects, with particular\
+            \ attention to expression style and sentence structure):\nStyle Consistency:\n\
+            Overall Style: Is the overall language style of the text (formal/informal,\
+            \ serious/humorous, objective/subjective, etc.) consistent and unified\
+            \ throughout?\nTone and Attitude: Is the tone and attitude consistent\
+            \ throughout the text? Are there any sudden shifts or inconsistencies?\n\
+            Word Choice and Sentence Construction: Is the choice of words and sentence\
+            \ structure (e.g., long sentences/short sentences, active/passive voice)\
+            \ consistent throughout? Are there any instances of mixed styles?\nRhythm\
+            \ of Writing: Is the rhythm of the writing consistent, or does it suddenly\
+            \ speed up or slow down? However, please note, do not suggest changing\
+            \ the overall pace of the article; focus on the internal rhythm of sentences\
+            \ and paragraphs.\nTarget Audience Appropriateness:\nAudience Profile:\
+            \ The target audience includes technical professionals and general readers\
+            \ interested in AI, programming, product, business, and other related\
+            \ fields.\nLanguage Difficulty: Is the language difficulty (vocabulary,\
+            \ sentence structures, use of technical terms, etc.) appropriate for the\
+            \ target audience’s understanding? Is there a balance between technical\
+            \ depth and readability?\nContent Depth: Is the content depth and information\
+            \ volume suitable for the target audience’s needs and interests? However,\
+            \ please do not suggest adding or removing content; focus on the presentation\
+            \ of the existing content.\nExpression Methods: Do the expression methods\
+            \ (e.g., use of cases, metaphors, charts) align with the target audience's\
+            \ reading habits and preferences? Do they help with the understanding\
+            \ and absorption of technical content?\nEmotional Resonance: Does the\
+            \ text evoke emotional resonance from the target audience, sparking their\
+            \ interest or sense of identification?\nOverall Effectiveness:\nAttractiveness:\
+            \ Does the text effectively grab the attention of the target audience\
+            \ and spark their interest in reading? Is the introduction engaging? However,\
+            \ please do not suggest changing the way the introduction is structured;\
+            \ focus on whether the current introduction is clear in its expression.\n\
+            Clarity: Does the text clearly, accurately, and concisely convey its core\
+            \ message? Are there any unclear expressions, ambiguous meanings, or redundant\
+            \ information?\nPersuasiveness: If the text has a persuasive intent (e.g.,\
+            \ product introduction, argumentation), is it convincing? Is the argument\
+            \ sufficiently strong? However, please do not suggest adding new arguments;\
+            \ focus on whether the existing arguments are expressed clearly.\nMemorability:\
+            \ Does the text leave a lasting impression on the reader? Does it have\
+            \ unique memorable points or highlights? However, please do not suggest\
+            \ adding new memorable points; focus on how the existing content is presented.\n\
+            Call to Action: If the text includes a call to action, is it clear and\
+            \ effective?\nImportant Constraints:\nDo not arbitrarily modify the article\
+            \ structure: The focus of the review is on optimizing expression style\
+            \ and sentence structure, as well as the suitability of the existing content\
+            \ for the target audience. Please do not suggest changing the paragraph\
+            \ structure, adding or removing paragraphs, or rearranging the content\
+            \ order.\nSpecific Suggestions (Please be sure to provide):\nPlease provide\
+            \ specific, clear, and actionable improvement suggestions for any issues\
+            \ affecting style consistency, target audience suitability, or overall\
+            \ effectiveness. Clearly indicate:\nProblem Location: Which paragraph,\
+            \ sentence, or part of the text contains the issue.\nProblem Description:\
+            \ Briefly explain the issue (e.g., inconsistent style, sudden tone shift,\
+            \ unsuitable for target audience, unclear expression, lack of attraction,\
+            \ etc.).\nModification Suggestions: Provide concrete suggestions for modifying\
+            \ the text, such as adjusting language style, changing words, modifying\
+            \ sentence structure, or altering expression methods. Please try to make\
+            \ changes without altering the overall structure of the original text.\n\
+            Example:\n“The language style in paragraph 1 and paragraph 4 is inconsistent;\
+            \ the former is too colloquial, and the latter is too formal. I suggest\
+            \ adjusting both to a style that aligns more with technical articles,\
+            \ such as a more neutral tone.”\n\"Considering the target audience includes\
+            \ general readers, the use of terms like 'XXX' and 'YYY' in paragraph\
+            \ 2 may be too technical. It’s recommended to add brief explanations after\
+            \ these terms or replace them with more accessible alternatives.\"\n“The\
+            \ expression in paragraph 3 is somewhat abstract. I suggest adding a specific\
+            \ case or metaphor to help readers understand better.”\n\"The sentence\
+            \ in paragraph 5 is too long. I suggest breaking it into shorter sentences\
+            \ for clearer expression.\"\nInput Format Explanation:\nInput is an XML\
+            \ structure:\n<article>\n  <source lang=\"en\">\n    <content><![CDATA[Original\
+            \ Content]]></content>\n  </source>\n  <rewritten lang=\"zh\">\n    <draft><![CDATA[Initial\
+            \ Rewrite]]></draft>\n  </rewritten>\n</article>\n\nOutput Requirements:\n\
+            Output in Markdown format with the review opinions and improvement suggestions.\n\
+            Be sure to make the review clear, specific, and actionable.\nList all\
+            \ identified problems and corresponding suggestions in a way that is easy\
+            \ to follow for subsequent revisions.\nIf the text excels in a certain\
+            \ area (e.g., an engaging expression in a particular paragraph), feel\
+            \ free to briefly mention it.\n"
+        - id: ba6e7382-2fc4-4fd9-b4a5-8691174b4770
+          role: user
+          text: "<article>\n  <source lang=\"en\">\n    <content><![CDATA[{{#1739416889031.text#}}]]></content>\n\
+            \  </source>\n  <rewritten lang=\"zh\">\n    <draft><![CDATA[{{#1739417108713.text#}}]]></draft>\n\
+            \  </rewritten>\n</article>"
+        selected: false
+        title: Style Consistency and Target Audience Appropriateness Review
+        type: llm
+        variables: []
+        vision:
+          configs:
+            detail: high
+            variable_selector:
+            - '1739416889031'
+            - files
+          enabled: true
+      height: 171
+      id: '1739591485269'
+      position:
+        x: 942
+        y: 760.5
+      positionAbsolute:
+        x: 942
+        y: 760.5
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gemini-2.0-flash-exp
+          provider: langgenius/gemini/google
+        prompt_template:
+        - id: a588de02-b52b-47a1-b230-a62e8a826925
+          role: system
+          text: "You are a seasoned language expert, technical editor, and proofreader,\
+            \ specializing in text polishing, proofreading, and consistency checks.\
+            \ Please carefully read the following Chinese technical article (the revised\
+            \ section) that has gone through multiple rounds of review and improvement,\
+            \ and perform the final polishing and consistency check to ensure the\
+            \ article reaches its optimal quality.\nArticle Domain: AI, programming,\
+            \ product, business, and other technical fields.\nTarget Audience: Technical\
+            \ professionals and general readers interested in these fields.\nTask\
+            \ Objective:\nPerform the final polishing and consistency check on the\
+            \ article to ensure:\nSmooth, Natural, and Fluent Language: The text should\
+            \ be free from any language expression flaws, making it read as if it\
+            \ were written by a native Chinese speaker.\nAccuracy and Logical Clarity:\
+            \ The text should have no factual errors, logical gaps, or unclear expressions.\n\
+            Consistent Style and Proper Formatting: The text should maintain a high\
+            \ level of consistency in language style, terminology usage, punctuation,\
+            \ formatting, etc.\nAdaptation to Target Audience's Reading Habits: The\
+            \ language difficulty and expression style should align with the target\
+            \ audience's understanding and reading preferences.\nKey Areas of Focus\
+            \ (Please make sure to comprehensively consider the following aspects):\n\
+            Language Polishing:\nVocabulary: Check if there are more precise, natural,\
+            \ or contextually appropriate words to replace any existing ones.\nSentence\
+            \ Structure: Check if there are simpler, smoother, or more natural sentence\
+            \ structures that better align with Chinese expression habits.\nTone:\
+            \ Check if the tone is natural, appropriate, and aligns with the overall\
+            \ style of the article and the target audience.\nPacing: Check if the\
+            \ overall pacing of the article is smooth, avoiding sudden fluctuations\
+            \ or monotony.\nContent Proofreading:\nFactual Errors: Recheck the accuracy\
+            \ of the facts, data, cases, and other references mentioned in the text.\n\
+            Logical Gaps: Recheck the overall logic of the article and the internal\
+            \ logic of each paragraph for any reasoning errors or insufficient argumentation.\n\
+            Unclear Expressions: Check for any vague meanings, unclear references,\
+            \ or expressions that may lead to ambiguity.\nConsistency Check:\nTerminology\
+            \ Consistency: Ensure that the same term is used consistently throughout\
+            \ the article to describe the same concept, avoiding mixing synonyms.\n\
+            Style Consistency: Ensure the language style (formal/informal, serious/humorous,\
+            \ etc.) is consistent throughout the article.\nPunctuation Consistency:\
+            \ Ensure that punctuation is used in a standard and unified manner throughout\
+            \ the text.\nFormatting Consistency: Ensure that formatting elements like\
+            \ heading levels, lists, citations, and code blocks are consistent throughout\
+            \ the article.\nProper Noun Consistency: Ensure that the spelling and\
+            \ capitalization of proper nouns (e.g., company names, product names,\
+            \ personal names) remain consistent throughout the text.\nAudience Adaptation:\n\
+            Language Difficulty: From the perspective of the target audience, re-evaluate\
+            \ whether the language difficulty is appropriate.\nExpression Style: Check\
+            \ if the expression style helps the target audience understand and absorb\
+            \ the information effectively.\nTechnicality: Ensure that technical terms\
+            \ are not excessive or inadequately explained.\nImportant Notes:\nThis\
+            \ is the final polishing stage; at this point, only minor adjustments\
+            \ should be made. No major changes should be introduced.\nIf any serious\
+            \ issues are discovered (e.g., significant deviations from the original\
+            \ meaning, clear logical errors), please point them out in the \"Modification\
+            \ Notes\" section. Do not directly modify them.\nInput Information: The\
+            \ input is an XML structure:\n<article>\n    <rewritten lang=\"zh\">\n\
+            \        <revised><![CDATA[The improved rewritten article]]></revised>\n\
+            \    </rewritten>\n</article>\n\nOutput Requirements:\nPolished Article:\n\
+            Output the final version of the article after the last round of polishing\
+            \ and consistency checks in Markdown format.\nEnsure proper formatting,\
+            \ clear typography, and readability.\nModification Notes (Optional but\
+            \ recommended):\nIf any changes were made, briefly explain what was modified\
+            \ and why.\nIf any serious issues were found, clearly point them out but\
+            \ do not directly modify them.\nExample (Modification Notes section):\n\
+            **Modification Notes:**\n\n* Changed the phrase “XX” in the second sentence\
+            \ of paragraph 3 to “YY” for more precise expression.\n* Unified the usage\
+            \ of “artificial intelligence” and “AI” throughout the article, using\
+            \ “artificial intelligence” consistently.\n* Corrected a punctuation error\
+            \ in paragraph 5.\n* Found a potential issue with data citation in paragraph\
+            \ 4 (does not align with the information I have), suggesting further verification.\
+            \ *[Serious issue, not directly modified]*"
+        - id: 0520e390-d01e-42a5-a2be-c2d2c1df238c
+          role: user
+          text: "<article>\n    <rewritten lang=\"zh\">\n        <revised><![CDATA[{{#1739418260707.text#}}]]></revised>\n\
+            \    </rewritten>\n</article>"
+        selected: false
+        title: Final Polish
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 95
+      id: '1739591515940'
+      position:
+        x: 1550
+        y: 578.5
+      positionAbsolute:
+        x: 1550
+        y: 578.5
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        author: stvlynn
+        desc: ''
+        height: 331
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          14px;","text":"Bidding Farewell to Stilted Translation","type":"text","version":1}],"direction":"ltr","format":"start","indent":0,"type":"paragraph","version":1,"textFormat":0},{"children":[],"direction":"ltr","format":"start","indent":0,"type":"paragraph","version":1,"textFormat":0},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Author:
+          Gino (https://x.com/hongming731)","type":"text","version":1}],"direction":"ltr","format":"start","indent":0,"type":"paragraph","version":1,"textFormat":0},{"children":[],"direction":"ltr","format":"start","indent":0,"type":"paragraph","version":1,"textFormat":0},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Read
+          full article: https://www.ginonotes.com/posts/ai-driven-multi-round-review-translation-workflow","type":"text","version":1}],"direction":"ltr","format":"start","indent":0,"type":"paragraph","version":1,"textFormat":0},{"children":[],"direction":"ltr","format":"start","indent":0,"type":"paragraph","version":1,"textFormat":0},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Gino:","type":"text","version":1}],"direction":"ltr","format":"start","indent":0,"type":"paragraph","version":1,"textFormat":0},{"children":[],"direction":"ltr","format":"start","indent":0,"type":"paragraph","version":1,"textFormat":0},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Simple
+          \"translation\" or \"rewriting\" often falls short of the requirements for
+          high-quality content. Even after initial rewriting, the text may still suffer
+          from the following issues:","type":"text","version":1}],"direction":"ltr","format":"start","indent":0,"type":"paragraph","version":1,"textFormat":0},{"children":[],"direction":"ltr","format":"start","indent":0,"type":"paragraph","version":1,"textFormat":0},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Language
+          Level: Expressions may sound unnatural, word choices may be inaccurate,
+          and sentence structures may not conform to standard Chinese conventions.","type":"text","version":1}],"direction":"ltr","format":"start","indent":0,"type":"paragraph","version":1,"textFormat":0},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Content
+          Level: Information may be missing or inaccurate, the logic may be unclear,
+          and technical terms may be handled improperly.","type":"text","version":1}],"direction":"ltr","format":"start","indent":0,"type":"paragraph","version":1,"textFormat":0},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Style
+          Level: The tone may be inconsistent, and it may not suit the reading habits
+          of the target audience (technical personnel and general readers).","type":"text","version":1}],"direction":"ltr","format":"start","indent":0,"type":"paragraph","version":1,"textFormat":0},{"children":[],"direction":"ltr","format":"start","indent":0,"type":"paragraph","version":1,"textFormat":0},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"To
+          address these issues, I designed a multi-round review and polishing workflow.
+          This workflow leverages multiple LLMs to review and optimize the rewritten
+          text from different perspectives, ultimately generating high-quality Chinese
+          content. This multi-round review approach is inspired by \"Code Review\"
+          in software development, where reviews by different roles identify and resolve
+          potential issues, thereby improving code quality.","type":"text","version":1}],"direction":"ltr","format":"start","indent":0,"type":"paragraph","version":1,"textFormat":0}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: blue
+        title: ''
+        type: ''
+        width: 410
+      height: 331
+      id: '1739768032226'
+      position:
+        x: -177.1428571428571
+        y: -9.999999999999943
+      positionAbsolute:
+        x: -177.1428571428571
+        y: -9.999999999999943
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 410
+    - data:
+        author: stvlynn
+        desc: ''
+        height: 257
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"Preliminary
+          Rewriting: ","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"Input
+          the scraped English source text into an LLM for preliminary Chinese rewriting,
+          with the goal of generating a first draft that basically conforms to Chinese
+          grammar and expression habits.","type":"text","version":1}],"direction":"ltr","format":"start","indent":0,"type":"listitem","version":1,"value":1}],"direction":"ltr","format":"","indent":0,"type":"list","version":1,"listType":"number","start":1,"tag":"ol"}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: blue
+        title: ''
+        type: ''
+        width: 247
+      height: 257
+      id: '1739768329262'
+      position:
+        x: 638
+        y: -9.999999999999943
+      positionAbsolute:
+        x: 638
+        y: -9.999999999999943
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 247
+    - data:
+        author: stvlynn
+        desc: ''
+        height: 257
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"Multi-Round
+          Review:","type":"text","version":1}],"direction":"ltr","format":"start","indent":0,"type":"listitem","version":1,"value":1},{"children":[],"direction":null,"format":"","indent":0,"type":"listitem","version":1,"value":2},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Parallel
+          Review: Simultaneously engage three different LLMs to review the initial
+          draft from three perspectives: linguistic fluency and authenticity, content
+          accuracy and logical coherence, and stylistic consistency and reader appropriateness.
+          Provide specific suggestions for revisions.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"listitem","version":1,"value":3},{"children":[],"direction":null,"format":"","indent":0,"type":"listitem","version":1,"value":4},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Reflective
+          Improvement: Through multi-round, multi-dimensional review, identify issues
+          that a single LLM might overlook, comprehensively improving the quality
+          of the rewrite.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"listitem","version":1,"value":5}],"direction":"ltr","format":"","indent":0,"type":"list","version":1,"listType":"number","start":1,"tag":"ol"}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: blue
+        title: ''
+        type: ''
+        width: 247
+      height: 257
+      id: '1739768346905'
+      position:
+        x: 942
+        y: -9.999999999999943
+      positionAbsolute:
+        x: 942
+        y: -9.999999999999943
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 247
+    - data:
+        author: stvlynn
+        desc: ''
+        height: 215
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"Comprehensive
+          Improvement: ","type":"text","version":1}],"direction":"ltr","format":"start","indent":0,"type":"listitem","version":1,"value":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Input
+          the original text, the initial draft, and the feedback from three reviewer
+          LLMs into another LLM for comprehensive improvement, generating a revised
+          and improved article.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"listitem","version":1,"value":2}],"direction":"ltr","format":"","indent":0,"type":"list","version":1,"listType":"number","start":1,"tag":"ol"}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: blue
+        title: ''
+        type: ''
+        width: 240
+      height: 215
+      id: '1739768377957'
+      position:
+        x: 1246
+        y: 285.8262591373001
+      positionAbsolute:
+        x: 1246
+        y: 285.8262591373001
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 240
+    - data:
+        author: stvlynn
+        desc: ''
+        height: 191
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"Final
+          polish: ","type":"text","version":1}],"direction":"ltr","format":"start","indent":0,"type":"listitem","version":1,"value":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Perform
+          a final polish and consistency check on the improved article to ensure the
+          quality of the final output text.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"listitem","version":1,"value":2}],"direction":"ltr","format":"","indent":0,"type":"list","version":1,"listType":"number","start":1,"tag":"ol"}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: blue
+        title: ''
+        type: ''
+        width: 242
+      height: 191
+      id: '1739768393788'
+      position:
+        x: 1535.2518617689275
+        y: 284.62652078497996
+      positionAbsolute:
+        x: 1535.2518617689275
+        y: 284.62652078497996
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 242
+    - data:
+        author: stvlynn
+        desc: ''
+        height: 300
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"Content
+          Extraction: ","type":"text","version":1}],"direction":"ltr","format":"start","indent":0,"type":"listitem","version":1,"value":1},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Use
+          the FireCrawl tool to extract article content from provided URLs, automatically
+          cleaning up irrelevant content such as navigation bars and advertisements.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"listitem","version":1,"value":2}],"direction":"ltr","format":"","indent":0,"type":"list","version":1,"listType":"number","start":1,"tag":"ol"}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: blue
+        title: ''
+        type: ''
+        width: 282
+      height: 300
+      id: '1739768844880'
+      position:
+        x: 316.454108437928
+        y: 2.864105879288431
+      positionAbsolute:
+        x: 316.454108437928
+        y: 2.864105879288431
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 282
+    viewport:
+      x: 337.7062541421919
+      y: 78.41384827898287
+      zoom: 0.4602389594005828

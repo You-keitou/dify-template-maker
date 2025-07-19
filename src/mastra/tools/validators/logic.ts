@@ -92,21 +92,34 @@ function validateNodeConnectivity(context: ValidationContext): void {
     const node = context.nodeMap.get(nodeId)!;
 
     if (!connectedNodes.has(nodeId) && node.type !== NODE_TYPES.START) {
-      context.issues.push({
-        level: 'error',
-        path: `workflow.graph.nodes[${nodeId}]`,
-        message: `ノード '${nodeId}' が他のノードと接続されていません`,
-        suggestion: 'このノードを他のノードと接続するか、不要な場合は削除してください',
-        autoFixable: true,
-        fixId: 'unconnected-node',
-      });
+      // custom-noteノードは意図的に孤立している（コメント機能）
+      if (node.type === NODE_TYPES.CUSTOM_NOTE) {
+        context.issues.push({
+          level: 'info',
+          path: `workflow.graph.nodes[${nodeId}]`,
+          message: `コメント/注釈ノード '${nodeId}' が検出されました`,
+          suggestion: 'これはワークフローの説明用ノードです',
+        });
+      } else {
+        context.issues.push({
+          level: 'error',
+          path: `workflow.graph.nodes[${nodeId}]`,
+          message: `ノード '${nodeId}' が他のノードと接続されていません`,
+          suggestion: 'このノードを他のノードと接続するか、不要な場合は削除してください',
+          autoFixable: true,
+          fixId: 'unconnected-node',
+        });
+      }
     } else if (!reachableNodes.has(nodeId) && node.type !== NODE_TYPES.START) {
-      context.issues.push({
-        level: 'warning',
-        path: `workflow.graph.nodes[${nodeId}]`,
-        message: `ノード '${nodeId}' はstartノードから到達できません`,
-        suggestion: 'ワークフローの実行時にこのノードは実行されません',
-      });
+      // custom-noteノードは到達性をチェックしない（コメント機能）
+      if (node.type !== NODE_TYPES.CUSTOM_NOTE) {
+        context.issues.push({
+          level: 'warning',
+          path: `workflow.graph.nodes[${nodeId}]`,
+          message: `ノード '${nodeId}' はstartノードから到達できません`,
+          suggestion: 'ワークフローの実行時にこのノードは実行されません',
+        });
+      }
     }
   });
 
@@ -118,7 +131,8 @@ function validateNodeConnectivity(context: ValidationContext): void {
     if (
       outgoingEdges.length === 0 &&
       node.type !== NODE_TYPES.END &&
-      node.type !== NODE_TYPES.ANSWER
+      node.type !== NODE_TYPES.ANSWER &&
+      node.type !== NODE_TYPES.CUSTOM_NOTE  // コメントノードは出力がなくて正常
     ) {
       context.issues.push({
         level: 'warning',

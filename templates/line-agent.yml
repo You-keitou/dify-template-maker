@@ -1,0 +1,318 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: advanced-chat
+  name: line-agent
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.3.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: agent
+        targetType: answer
+      id: 1744994821708-source-1744994837046-target
+      source: '1744994821708'
+      sourceHandle: source
+      target: '1744994837046'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: 1744994815686-source-1744994900519-target
+      source: '1744994815686'
+      sourceHandle: source
+      target: '1744994900519'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: agent
+      id: 1744994900519-source-1744994821708-target
+      source: '1744994900519'
+      sourceHandle: source
+      target: '1744994821708'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 開始
+        type: start
+        variables: []
+      height: 53
+      id: '1744994815686'
+      position:
+        x: 100
+        y: 280
+      positionAbsolute:
+        x: 100
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        agent_parameters:
+          instruction:
+            type: constant
+            value: '必ずline mcp toolを使って、返信をしてください。
+
+
+              DESTINATION_USER_ID: {{#1744994900519.userId#}}
+
+              '
+          maximum_iterations:
+            type: constant
+            value: 10
+          mcp_server:
+            type: constant
+            value: ''
+          model:
+            type: constant
+            value:
+              completion_params: {}
+              mode: chat
+              model: gpt-4o-mini
+              model_type: llm
+              provider: langgenius/openai/openai
+              type: model-selector
+          query:
+            type: constant
+            value: '{{#1744994900519.message#}}'
+          tools:
+            type: constant
+            value:
+            - enabled: true
+              extra:
+                description: ''
+              parameters: {}
+              provider_name: junjiem/mcp_sse/mcp_sse
+              schemas: []
+              settings: {}
+              tool_label: Fetch MCP Tools
+              tool_name: mcp_sse_list_tools
+              type: builtin
+            - enabled: true
+              extra:
+                description: ''
+              parameters:
+                arguments:
+                  auto: 1
+                  value: null
+                tool_name:
+                  auto: 1
+                  value: null
+              provider_name: junjiem/mcp_sse/mcp_sse
+              schemas:
+              - auto_generate: null
+                default: null
+                form: llm
+                human_description:
+                  en_US: Name of the tool to execute.
+                  ja_JP: Name of the tool to execute.
+                  pt_BR: Name of the tool to execute.
+                  zh_Hans: 要执行的工具的名称。
+                label:
+                  en_US: Tool Name
+                  ja_JP: Tool Name
+                  pt_BR: Tool Name
+                  zh_Hans: 工具名称
+                llm_description: Name of the tool to execute.
+                max: null
+                min: null
+                name: tool_name
+                options: []
+                placeholder: null
+                precision: null
+                required: true
+                scope: null
+                template: null
+                type: string
+              - auto_generate: null
+                default: null
+                form: llm
+                human_description:
+                  en_US: Tool arguments (JSON string in the python dict[str, Any]
+                    format).
+                  ja_JP: Tool arguments (JSON string in the python dict[str, Any]
+                    format).
+                  pt_BR: Tool arguments (JSON string in the python dict[str, Any]
+                    format).
+                  zh_Hans: 工具的参数。
+                label:
+                  en_US: Arguments
+                  ja_JP: Arguments
+                  pt_BR: Arguments
+                  zh_Hans: 参数
+                llm_description: Tool arguments (JSON string in the python dict[str,
+                  Any] format).
+                max: null
+                min: null
+                name: arguments
+                options: []
+                placeholder: null
+                precision: null
+                required: true
+                scope: null
+                template: null
+                type: string
+              settings: {}
+              tool_label: Call MCP Tool
+              tool_name: mcp_sse_call_tool
+              type: builtin
+        agent_strategy_label: MCP FunctionCalling
+        agent_strategy_name: function_calling
+        agent_strategy_provider_name: hjlarry/agent/mcp_agent
+        desc: ''
+        output_schema: null
+        plugin_unique_identifier: hjlarry/agent:0.0.1@f42a5a80b1c77fd0655c755b70ad08da47ceb1acc3638cf13a0eb9ed42b3a128
+        selected: false
+        title: エージェント
+        type: agent
+        version: '2'
+      height: 197
+      id: '1744994821708'
+      position:
+        x: 747
+        y: 293
+      positionAbsolute:
+        x: 747
+        y: 293
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        answer: '{{#1744994821708.text#}}'
+        desc: ''
+        selected: false
+        title: 回答
+        type: answer
+        variables: []
+      height: 103
+      id: '1744994837046'
+      position:
+        x: 1055
+        y: 334
+      positionAbsolute:
+        x: 1055
+        y: 334
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        code: "\nfunction main({event}) {\n    // LINEのWebhookデータをパース\n    const data\
+          \ = JSON.parse(event);\n\n    // ユーザーメッセージを抽出\n    const userMessage = data.events[0].message.text;\n\
+          \    const replyToken = data.events[0].replyToken;\n    const userId = data.events[0].source.userId;\n\
+          \n    // グループチャットかどうかを判断\n    let groupId = null;\n    if (data.events[0].source.type\
+          \ === \"group\") {\n    groupId = data.events[0].source.groupId;\n    }\n\
+          \n    // 後続処理のために必要な情報を渡す\n    return {\n        message: userMessage,\n\
+          \        replyToken: replyToken,\n        userId: userId,\n        groupId:\
+          \ groupId,\n        sourceType: data.events[0].source.type\n    };\n}\n"
+        code_language: javascript
+        desc: ''
+        outputs:
+          groupId:
+            children: null
+            type: string
+          message:
+            children: null
+            type: string
+          replyToken:
+            children: null
+            type: string
+          sourceType:
+            children: null
+            type: string
+          userId:
+            children: null
+            type: string
+        selected: false
+        title: webhookをパース
+        type: code
+        variables:
+        - value_selector:
+          - sys
+          - query
+          variable: event
+      height: 53
+      id: '1744994900519'
+      position:
+        x: 415
+        y: 293
+      positionAbsolute:
+        x: 415
+        y: 293
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    viewport:
+      x: -94.29557884819758
+      y: -29.99250438767973
+      zoom: 1.0132333918357295
