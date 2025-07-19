@@ -38,7 +38,7 @@ const autoFixHandlers: Record<string, (dsl: DifyDSL) => DifyDSL> = {
             type: 'start',
             position: { x: 100, y: 100 },
             data: {
-              variable: [
+              variables: [
                 {
                   variable: 'user_input',
                   label: 'User Input',
@@ -92,6 +92,7 @@ const autoFixHandlers: Record<string, (dsl: DifyDSL) => DifyDSL> = {
       workflow: {
         ...dsl.workflow,
         graph: {
+          ...dsl.workflow?.graph,
           nodes: nodes.map((node) => {
             if (node.type === 'llm' && node.data?.temperature > 1.0) {
               return {
@@ -104,12 +105,7 @@ const autoFixHandlers: Record<string, (dsl: DifyDSL) => DifyDSL> = {
             }
             return node;
           }),
-          edges: dsl.workflow?.graph?.edges || [],
         },
-        features: dsl.workflow?.features,
-        environment_variables: dsl.workflow?.environment_variables,
-        conversation_variables: dsl.workflow?.conversation_variables,
-        hash: dsl.workflow?.hash,
       },
     };
   },
@@ -121,6 +117,7 @@ const autoFixHandlers: Record<string, (dsl: DifyDSL) => DifyDSL> = {
       workflow: {
         ...dsl.workflow,
         graph: {
+          ...dsl.workflow?.graph,
           nodes: nodes.map((node) => {
             if (node.type === 'http-request' && !node.data?.timeout) {
               return {
@@ -133,12 +130,7 @@ const autoFixHandlers: Record<string, (dsl: DifyDSL) => DifyDSL> = {
             }
             return node;
           }),
-          edges: dsl.workflow?.graph?.edges || [],
         },
-        features: dsl.workflow?.features,
-        environment_variables: dsl.workflow?.environment_variables,
-        conversation_variables: dsl.workflow?.conversation_variables,
-        hash: dsl.workflow?.hash,
       },
     };
   },

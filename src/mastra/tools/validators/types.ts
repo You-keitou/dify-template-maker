@@ -93,8 +93,12 @@ export const NODE_TYPES = {
   LOOP_START: 'loop-start',
   LOOP_END: 'loop-end',
   ITERATION_START: 'iteration-start',
-  // React Flow rendering type
+  // React Flow rendering types
   CUSTOM: 'custom',
+  CUSTOM_ITERATION_START: 'custom-iteration-start',
+  CUSTOM_NOTE: 'custom-note',
+  // Dify internal node types
+  ASSIGNER: 'assigner',
 } as const;
 
 export type NodeType = (typeof NODE_TYPES)[keyof typeof NODE_TYPES];

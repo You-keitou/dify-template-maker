@@ -27,7 +27,7 @@ const NODE_VALIDATIONS: Record<NodeType, NodeTypeValidation> = {
     },
   },
   [NODE_TYPES.IF_ELSE]: {
-    required: ['conditions'],
+    required: [], // if-else node structure varies, no required fields for now
   },
   [NODE_TYPES.TEMPLATE_TRANSFORM]: {
     required: ['template'],
@@ -54,10 +54,10 @@ const NODE_VALIDATIONS: Record<NodeType, NodeTypeValidation> = {
     required: ['variables'],
   },
   [NODE_TYPES.VARIABLE_ASSIGNER]: {
-    required: ['variable_assigner'],
+    required: ['variables'],
   },
   [NODE_TYPES.ITERATION]: {
-    required: ['iterator'],
+    required: ['iterator_selector'],
   },
   [NODE_TYPES.ANSWER]: {
     required: ['answer'],
@@ -88,6 +88,15 @@ const NODE_VALIDATIONS: Record<NodeType, NodeTypeValidation> = {
   },
   [NODE_TYPES.CUSTOM]: {
     required: ['type'], // For custom nodes, data.type is required
+  },
+  [NODE_TYPES.CUSTOM_ITERATION_START]: {
+    required: [],
+  },
+  [NODE_TYPES.CUSTOM_NOTE]: {
+    required: [],
+  },
+  [NODE_TYPES.ASSIGNER]: {
+    required: ['items'],
   },
 };
 
