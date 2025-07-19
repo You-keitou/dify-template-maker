@@ -1,4 +1,13 @@
-import { type DifyEdge, type DifyNode, NODE_TYPES, type ValidationContext } from './types';
+import { 
+  type DifyEdge, 
+  type DifyNode, 
+  NODE_TYPES, 
+  type ValidationContext,
+  VARIABLE_NAMESPACES,
+  SYSTEM_VARIABLES,
+  VARIABLE_PATTERN,
+  type ConversationVariable,
+} from './types';
 
 // ヘルパー関数：ノードの実際のタイプを取得
 function getNodeType(node: DifyNode): string {
@@ -274,40 +283,173 @@ function validateConditionalBranches(context: ValidationContext): void {
 }
 
 function validateVariableReferences(context: ValidationContext): void {
-  const variablePattern = /\{\{#([^.]+)\.([^#]+)#\}\}/g;
+  // Initialize cache if not exists
+  if (!context.variableValidationCache) {
+    context.variableValidationCache = new Map();
+  }
 
   context.nodeMap.forEach((node, nodeId) => {
     // ノードのdata内の文字列フィールドを再帰的に検索
     const variables = extractVariables(node.data);
 
     variables.forEach(({ variable, path }) => {
-      const [referencedNodeId, propertyPath] = variable.split('.', 2);
+      // Cache check for performance
+      const cacheKey = `${nodeId}:${variable}`;
+      if (context.variableValidationCache!.has(cacheKey)) {
+        return;
+      }
+      context.variableValidationCache!.set(cacheKey, true);
 
-      if (!context.nodeMap.has(referencedNodeId)) {
-        context.issues.push({
-          level: 'error',
-          path: `workflow.graph.nodes[${nodeId}].data${path}`,
-          message: `存在しないノード '${referencedNodeId}' への変数参照: {{#${variable}#}}`,
-          suggestion: '参照先のノードIDを確認してください',
-        });
+      // Split variable into parts for prefix-based dispatch
+      const parts = variable.split('.');
+      const prefix = parts[0];
+
+      // Dispatch based on prefix
+      if (prefix === VARIABLE_NAMESPACES.SYSTEM) {
+        validateSystemVariable(context, nodeId, variable, path);
+      } else if (prefix === VARIABLE_NAMESPACES.CONVERSATION) {
+        validateConversationVariable(context, nodeId, variable, path);
       } else {
-        // 参照先のノードが現在のノードより後に実行されるかチェック
-        if (!isNodeExecutedBefore(context, referencedNodeId, nodeId)) {
-          context.issues.push({
-            level: 'warning',
-            path: `workflow.graph.nodes[${nodeId}].data${path}`,
-            message: `ノード '${referencedNodeId}' はまだ実行されていない可能性があります`,
-            suggestion: 'ワークフローの実行順序を確認してください',
-          });
-        }
+        // Node variable reference
+        validateNodeVariable(context, nodeId, variable, path, prefix);
       }
     });
   });
 }
 
+function validateSystemVariable(
+  context: ValidationContext,
+  nodeId: string,
+  variable: string,
+  path: string
+): void {
+  const validSystemVars = Object.values(SYSTEM_VARIABLES);
+  
+  if (!validSystemVars.some(v => variable === v || variable.startsWith(v + '.'))) {
+    context.issues.push({
+      level: 'warning',
+      path: `workflow.graph.nodes[${nodeId}].data${path}`,
+      message: `未知のシステム変数: {{#${variable}#}}`,
+      suggestion: `有効なシステム変数: ${validSystemVars.join(', ')}`,
+    });
+  }
+}
+
+function validateConversationVariable(
+  context: ValidationContext,
+  nodeId: string,
+  variable: string,
+  path: string
+): void {
+  const conversationVars = context.dsl.workflow?.conversation_variables || [];
+  const varName = variable.split('.').slice(1).join('.');
+
+  // Check if the conversation variable is defined in the DSL
+  const isDefined = conversationVars.some((v: ConversationVariable) => {
+    // Check by name
+    if (v.name === varName) return true;
+    // Check by selector if it exists
+    if (v.selector && v.selector.join('.') === variable) return true;
+    // Check if it's a nested property of a defined variable
+    return conversationVars.some((cv: ConversationVariable) =>
+      variable.startsWith(`conversation.${cv.name}.`)
+    );
+  });
+
+  if (!isDefined) {
+    context.issues.push({
+      level: 'warning',
+      path: `workflow.graph.nodes[${nodeId}].data${path}`,
+      message: `未定義の会話変数: {{#${variable}#}}`,
+      suggestion: `workflow.conversation_variablesで変数を定義してください`,
+    });
+  }
+}
+
+function validateNodeVariable(
+  context: ValidationContext,
+  nodeId: string,
+  variable: string,
+  path: string,
+  referencedNodeId: string
+): void {
+  if (!context.nodeMap.has(referencedNodeId)) {
+    // Provide suggestions for typos using simple string similarity
+    const suggestions = findSimilarNodeIds(referencedNodeId, context.nodeMap);
+    const suggestionText = suggestions.length > 0
+      ? `もしかして: ${suggestions.join(', ')}`
+      : '参照先のノードIDを確認してください';
+
+    context.issues.push({
+      level: 'error',
+      path: `workflow.graph.nodes[${nodeId}].data${path}`,
+      message: `存在しないノード '${referencedNodeId}' への変数参照: {{#${variable}#}}`,
+      suggestion: suggestionText,
+    });
+  } else {
+    // Check execution order
+    if (!isNodeExecutedBefore(context, referencedNodeId, nodeId)) {
+      context.issues.push({
+        level: 'warning',
+        path: `workflow.graph.nodes[${nodeId}].data${path}`,
+        message: `ノード '${referencedNodeId}' はまだ実行されていない可能性があります`,
+        suggestion: 'ワークフローの実行順序を確認してください',
+      });
+    }
+  }
+}
+
+// Helper function to find similar node IDs (simple Levenshtein distance)
+function findSimilarNodeIds(target: string, nodeMap: Map<string, DifyNode>): string[] {
+  const nodeIds = Array.from(nodeMap.keys());
+  const suggestions: Array<{ id: string; distance: number }> = [];
+
+  nodeIds.forEach(id => {
+    const distance = levenshteinDistance(target, id);
+    if (distance <= 2 && distance > 0) {
+      suggestions.push({ id, distance });
+    }
+  });
+
+  return suggestions
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 3)
+    .map(s => s.id);
+}
+
+// Simple Levenshtein distance implementation
+function levenshteinDistance(a: string, b: string): number {
+  const matrix: number[][] = [];
+
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // substitution
+          matrix[i][j - 1] + 1,     // insertion
+          matrix[i - 1][j] + 1      // deletion
+        );
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
+}
+
 function extractVariables(obj: any, currentPath = ''): Array<{ variable: string; path: string }> {
   const results: Array<{ variable: string; path: string }> = [];
-  const variablePattern = /\{\{#([^#]+)#\}\}/g;
+  // Use the authoritative pattern from types
+  const variablePattern = new RegExp(VARIABLE_PATTERN.source, 'g');
 
   if (typeof obj === 'string') {
     let match;

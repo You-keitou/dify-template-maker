@@ -115,10 +115,55 @@ export type EdgeType = (typeof EDGE_TYPES)[keyof typeof EDGE_TYPES];
 
 export const CURRENT_DSL_VERSION = '0.3.0';
 
+// Dify System Variables - Authoritative list based on Dify documentation
+export const SYSTEM_VARIABLES = {
+  QUERY: 'sys.query',
+  FILES: 'sys.files',
+  CONVERSATION_ID: 'sys.conversation_id',
+  USER_ID: 'sys.user_id',
+  DIALOGUE_COUNT: 'sys.dialogue_count',
+  APP_ID: 'sys.app_id',
+  WORKFLOW_ID: 'sys.workflow_id',
+  WORKFLOW_EXECUTION_ID: 'sys.workflow_execution_id',
+} as const;
+
+export type SystemVariable = (typeof SYSTEM_VARIABLES)[keyof typeof SYSTEM_VARIABLES];
+
+// Conversation variable types supported by Dify
+export const CONVERSATION_VARIABLE_TYPES = {
+  STRING: 'string',
+  NUMBER: 'number',
+  OBJECT: 'object',
+  ARRAY_STRING: 'array[string]',
+  ARRAY_NUMBER: 'array[number]',
+  ARRAY_OBJECT: 'array[object]',
+} as const;
+
+export type ConversationVariableType = (typeof CONVERSATION_VARIABLE_TYPES)[keyof typeof CONVERSATION_VARIABLE_TYPES];
+
+export interface ConversationVariable {
+  name: string;
+  value_type: ConversationVariableType;
+  description?: string;
+  selector?: string[];
+  value?: any;
+}
+
+// Variable reference pattern as per Dify specification
+export const VARIABLE_PATTERN = /\{\{#([a-zA-Z0-9_]{1,50}(?:\.[a-zA-Z_][a-zA-Z0-9_]{0,29}){1,10})#\}\}/g;
+
+// Special node IDs for variable namespaces
+export const VARIABLE_NAMESPACES = {
+  SYSTEM: 'sys',
+  CONVERSATION: 'conversation',
+} as const;
+
 export interface ValidationContext {
   level: ValidationLevel;
   dsl: DifyDSL;
   issues: ValidationIssue[];
   nodeMap: Map<string, DifyNode>;
   edgeMap: Map<string, DifyEdge>;
+  // Cache for variable validation results
+  variableValidationCache?: Map<string, boolean>;
 }
