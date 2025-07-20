@@ -1,0 +1,179 @@
+app:
+  description: ''
+  icon: 🔢
+  icon_background: '#E4FBCC'
+  mode: agent-chat
+  name: YouTube Channel Data Analysis
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/chart:0.0.2@fb391d9f13ca1d76ceb2596650dd5f4b7b4b5e97a0be16cb22ed132d98a07f7f
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/wikipedia:0.0.3@c15c50172ae5abf681847180509a8df32d5944c3be3c91066d61c931b82b3470
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/openai:0.1.0@539dc0dde8ecaa84e61b8eeb154c3bb7fbc9caa80afd83763dd5860a725d2742
+kind: app
+model_config:
+  agent_mode:
+    enabled: true
+    max_iteration: 5
+    strategy: react
+    tools:
+    - enabled: true
+      isDeleted: false
+      notAuthor: false
+      provider_id: langgenius/chart/chart
+      provider_name: langgenius/chart/chart
+      provider_type: builtin
+      tool_label: Bar Chart
+      tool_name: bar_chart
+      tool_parameters:
+        data: ''
+        x_axis: ''
+    - enabled: true
+      isDeleted: false
+      notAuthor: false
+      provider_id: time
+      provider_name: time
+      provider_type: builtin
+      tool_label: Current Time
+      tool_name: current_time
+      tool_parameters: {}
+    - enabled: true
+      isDeleted: true
+      notAuthor: false
+      provider_id: langgenius/youtube/youtube
+      provider_name: langgenius/youtube/youtube
+      provider_type: builtin
+      tool_label: Video statistics
+      tool_name: youtube_video_statistics
+      tool_parameters:
+        channel: ''
+        end_date: ''
+        start_date: ''
+    - enabled: true
+      isDeleted: false
+      notAuthor: false
+      provider_id: langgenius/wikipedia/wikipedia
+      provider_name: langgenius/wikipedia/wikipedia
+      provider_type: builtin
+      tool_label: WikipediaSearch
+      tool_name: wikipedia_search
+      tool_parameters:
+        query: ''
+  annotation_reply:
+    enabled: false
+  chat_prompt_config: {}
+  completion_prompt_config: {}
+  dataset_configs:
+    datasets:
+      datasets: []
+    reranking_enable: false
+    retrieval_model: single
+    top_k: 4
+  dataset_query_variable: ''
+  external_data_tools: []
+  file_upload:
+    allowed_file_extensions:
+    - .JPG
+    - .JPEG
+    - .PNG
+    - .GIF
+    - .WEBP
+    - .SVG
+    - .MP4
+    - .MOV
+    - .MPEG
+    - .MPGA
+    allowed_file_types: []
+    allowed_file_upload_methods:
+    - remote_url
+    - local_file
+    enabled: false
+    image:
+      detail: high
+      enabled: false
+      number_limits: 3
+      transfer_methods:
+      - remote_url
+      - local_file
+    number_limits: 3
+  model:
+    completion_params:
+      frequency_penalty: 0.5
+      max_tokens: 4096
+      presence_penalty: 0.5
+      stop: []
+      temperature: 0.2
+      top_p: 0.75
+    mode: chat
+    name: gpt-4-1106-preview
+    provider: langgenius/openai/openai
+  more_like_this:
+    enabled: false
+  opening_statement: "As your YouTube Channel Data Analysis Copilot, I am here to\
+    \ provide comprehensive and expert data analysis tailored to your needs. To get\
+    \ started, I need some basic information about the YouTube channel you're interested\
+    \ in. \n\nFeel free to provide the name of the YouTube channel you're interested\
+    \ in, and specify any particular aspects you'd like the analysis to focus on.\
+    \ Try to ask: "
+  pre_prompt: "# Job Description: YouTube Channel Data Analysis Copilot\n## Character\n\
+    My primary goal is to provide user with expert data analysis advice on Youtubers.\
+    \ A YouTube channel data analysis report primarily focuses on evaluating the performance\
+    \ and growth of the channel and other key metrics. \n## Skills \n### Skill 1:\
+    \ Use 'Youtube Statistics' to get the relevant statistics and use functions.bar_chart\
+    \ to plot a graph. This tool requires the name of the channel, a start date and\
+    \ the end date. If date is not specified, use current date as end date, a year\
+    \ from now as start date. \n### Skill 2: Use 'wikipedia_search' to understand\
+    \ the overview of the channel. \n## Workflow\n1. Asks the user which youtube channel\
+    \ need to be analyzed. \n2. Use 'Video statistics' to get relevant statistics\
+    \ of the youtuber channel. \n3. Use 'functions.bar_chart' to plot the data from\
+    \ 'video_statistics' in past year. \n4. Performs the analysis in report template\
+    \ section in sequence.\n## Report Template\n1. **Channel Overview**\n- Channel\
+    \ name, creation date, and owner or brand.\n- Description of the channel's niche,\
+    \ target audience, and content type.\n2. **Performance Analysis**\n- Analyse videos\
+    \ posted in past 1 year. Highlight the top-performing videos, Low-performing videos\
+    \ and possible reasons.\n- Use 'functions.bar_chart' to plot the data from 'video_statistics'\
+    \ in past year. \n3. **Content Trends:**\n- Analysis of popular topics, themes,\
+    \ or series on the channel.\n- Any notable changes in content strategy or video\
+    \ format and their impact.\n4. **Competitor Analysis**\n- Comparison with similar\
+    \ channels (in terms of size, content, audience).\n- Benchmarking against competitors\
+    \ (views, subscriber growth, engagement).\n5. **SEO Analysis**\n- Performance\
+    \ of video titles, descriptions, and tags.\n- Recommendations for optimization.\n\
+    6. **Recommendations and Action Plan**\n- Based on the analysis, provide strategic\
+    \ recommendations to improve content creation, audience engagement, SEO, and monetization.\n\
+    - Short-term and long-term goals for the channel.\n- Proposed action plan with\
+    \ timelines and responsibilities.\n\n## Constraints\n- Your responses should be\
+    \ strictly on data analysis tasks. Use a structured language and think step by\
+    \ step. Give a structured response using bullet points and markdown syntax.\n\
+    - The language you use should be identical to the user's language.\n- Initiate\
+    \ your response with the optimized task instruction.\n- Avoid addressing questions\
+    \ regarding work tools and regulations.\n"
+  prompt_type: simple
+  retriever_resource:
+    enabled: true
+  sensitive_word_avoidance:
+    configs: []
+    enabled: false
+    type: ''
+  speech_to_text:
+    enabled: false
+  suggested_questions:
+  - 'Could you provide an analysis of Mr. Beast''s channel? '
+  - 'I''m interested in 3Blue1Brown. Please give me an detailed report. '
+  - Can you conduct a thorough analysis of PewDiePie's channel, highlighting performance
+    trends and areas for improvements?
+  suggested_questions_after_answer:
+    enabled: true
+  text_to_speech:
+    enabled: false
+    language: ''
+    voice: ''
+  user_input_form: []
+version: 0.3.0

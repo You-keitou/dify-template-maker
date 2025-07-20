@@ -1,8 +1,81 @@
+# ──────────────────────────
+#  Core Node / pnpm
+# ──────────────────────────
+node_modules/
+.pnpm-debug.log*
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# ──────────────────────────
+#  Build & tool output
+# ──────────────────────────
+dist/
+build/
+.turbo/
+.cache/
+coverage/
+*.tsbuildinfo
+*.map
 output.txt
-node_modules
-dist
-.mastra
-.env.development
-.env
+
+# ──────────────────────────
+#  IDE / Editor
+# ──────────────────────────
+.idea/
+.vscode/*
+!.vscode/settings.json
+*.sw?
+*.swo
+*.swn
+
+# ──────────────────────────
+#  OS-specific
+# ──────────────────────────
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+._*
+
+# ──────────────────────────
+#  Environment & secrets
+# ──────────────────────────
+.env*
+!.env.example
+
+# ──────────────────────────
+#  Logs & temp files
+# ──────────────────────────
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+
+# ──────────────────────────
+#  Research / experiments
+# ──────────────────────────
+research/**
+!research/README.md
+*.ipynb
+
+# ──────────────────────────
+#  Mastra specific
+# ──────────────────────────
+.mastra/
+.mastra-cache/
+
+# ──────────────────────────
+#  Database
+# ──────────────────────────
 *.db
 *.db-*
+*.sqlite
+*.sqlite3
+
+# ──────────────────────────
+#  Biome
+# ──────────────────────────
+.biome-cache/

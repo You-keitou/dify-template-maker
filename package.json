@@ -23,6 +23,8 @@
     "@ai-sdk/openai": "^1.3.23",
     "@mastra/core": "latest",
     "@mastra/loggers": "latest",
+    "@types/js-yaml": "^4.0.9",
+    "js-yaml": "^4.1.0",
     "zod": "^3.25.56"
   },
   "devDependencies": {
