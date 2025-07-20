@@ -1,4 +1,4 @@
-import { NODE_TYPES, type ValidationContext } from './types';
+import { type DifyNode, NODE_TYPES, type ValidationContext } from './types';
 
 const SENSITIVE_PATTERNS = [
   /api[_-]?key/i,
@@ -31,7 +31,7 @@ export function validateSecurity(context: ValidationContext): void {
   validateEnvironmentVariables(context);
 }
 
-function validateNodeSecurity(context: ValidationContext, node: any, nodeId: string): void {
+function validateNodeSecurity(context: ValidationContext, node: DifyNode, nodeId: string): void {
   switch (node.type) {
     case NODE_TYPES.HTTP_REQUEST:
       validateHTTPSecurity(context, node, nodeId);
@@ -48,13 +48,14 @@ function validateNodeSecurity(context: ValidationContext, node: any, nodeId: str
   checkSensitiveDataExposure(context, node, nodeId);
 }
 
-function validateHTTPSecurity(context: ValidationContext, node: any, nodeId: string): void {
+function validateHTTPSecurity(context: ValidationContext, node: DifyNode, nodeId: string): void {
   if (!node.data) return;
 
   // HTTPS使用の確認
-  if (node.data.url) {
+  const urlValue = node.data.url;
+  if (urlValue && typeof urlValue === 'string') {
     try {
-      const url = new URL(node.data.url);
+      const url = new URL(urlValue);
 
       if (url.protocol === 'http:' && context.level === 'strict') {
         context.issues.push({
@@ -80,7 +81,8 @@ function validateHTTPSecurity(context: ValidationContext, node: any, nodeId: str
   }
 
   // タイムアウト設定の確認
-  if (!node.data.timeout && node.data.timeout !== 0) {
+  const timeout = node.data.timeout;
+  if (!timeout && timeout !== 0) {
     context.issues.push({
       level: 'warning',
       path: `workflow.graph.nodes[${nodeId}].data.timeout`,
@@ -89,11 +91,11 @@ function validateHTTPSecurity(context: ValidationContext, node: any, nodeId: str
       autoFixable: true,
       fixId: 'missing-timeout',
     });
-  } else if (node.data.timeout > 300) {
+  } else if (typeof timeout === 'number' && timeout > 300) {
     context.issues.push({
       level: 'warning',
       path: `workflow.graph.nodes[${nodeId}].data.timeout`,
-      message: `タイムアウトが長すぎます（${node.data.timeout}秒）`,
+      message: `タイムアウトが長すぎます（${timeout}秒）`,
       suggestion: '通常は300秒以下のタイムアウトを推奨します',
     });
   }
@@ -109,10 +111,10 @@ function validateHTTPSecurity(context: ValidationContext, node: any, nodeId: str
   }
 }
 
-function validateCodeSecurity(context: ValidationContext, node: any, nodeId: string): void {
-  if (!node.data?.code) return;
+function validateCodeSecurity(context: ValidationContext, node: DifyNode, nodeId: string): void {
+  const code = node.data?.code;
+  if (!code || typeof code !== 'string') return;
 
-  const code = node.data.code;
   const dangerousPatterns = [
     { pattern: /eval\s*\(/g, name: 'eval()' },
     { pattern: /exec\s*\(/g, name: 'exec()' },
@@ -144,15 +146,23 @@ function validateCodeSecurity(context: ValidationContext, node: any, nodeId: str
   }
 }
 
-function validateLLMSecurity(context: ValidationContext, node: any, nodeId: string): void {
+function validateLLMSecurity(context: ValidationContext, node: DifyNode, nodeId: string): void {
   if (!node.data?.prompt_template) return;
 
   const prompts = Array.isArray(node.data.prompt_template)
     ? node.data.prompt_template
     : [node.data.prompt_template];
 
-  prompts.forEach((prompt: any, index: number) => {
-    const text = typeof prompt === 'string' ? prompt : prompt.text || '';
+  prompts.forEach((prompt: unknown, index: number) => {
+    const text =
+      typeof prompt === 'string'
+        ? prompt
+        : typeof prompt === 'object' &&
+            prompt !== null &&
+            'text' in prompt &&
+            typeof (prompt as Record<string, unknown>).text === 'string'
+          ? ((prompt as Record<string, unknown>).text as string)
+          : '';
 
     // プロンプトインジェクションの警告
     if (text.includes('{{#') && text.includes('#}}')) {
@@ -183,7 +193,11 @@ function validateLLMSecurity(context: ValidationContext, node: any, nodeId: stri
   });
 }
 
-function checkSensitiveDataExposure(context: ValidationContext, node: any, nodeId: string): void {
+function checkSensitiveDataExposure(
+  context: ValidationContext,
+  node: DifyNode,
+  nodeId: string,
+): void {
   // ノードデータ全体を文字列化して機密パターンをチェック
   const nodeDataStr = JSON.stringify(node.data || {});
 
@@ -203,10 +217,10 @@ function checkSensitiveDataExposure(context: ValidationContext, node: any, nodeI
   });
 }
 
-function checkAuthInHeaders(context: ValidationContext, headers: any, nodeId: string): void {
-  if (typeof headers !== 'object') return;
+function checkAuthInHeaders(context: ValidationContext, headers: unknown, nodeId: string): void {
+  if (!headers || typeof headers !== 'object' || headers === null) return;
 
-  Object.entries(headers).forEach(([key, value]) => {
+  Object.entries(headers as Record<string, unknown>).forEach(([key, value]) => {
     const keyLower = key.toLowerCase();
 
     // 認証ヘッダーの直接記載チェック
@@ -227,7 +241,7 @@ function checkAuthInHeaders(context: ValidationContext, headers: any, nodeId: st
   });
 }
 
-function checkSensitiveInBody(context: ValidationContext, body: any, nodeId: string): void {
+function checkSensitiveInBody(context: ValidationContext, body: unknown, nodeId: string): void {
   const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
 
   // パスワードやトークンの直接記載をチェック
@@ -246,10 +260,10 @@ function validateEnvironmentVariables(context: ValidationContext): void {
   const envVars = context.dsl.workflow?.environment_variables || [];
 
   envVars.forEach((envVar, index) => {
-    if (envVar.name) {
+    if (envVar.name && typeof envVar.name === 'string') {
       // 環境変数名のパターンチェック
       SENSITIVE_PATTERNS.forEach((pattern) => {
-        if (pattern.test(envVar.name) && envVar.value) {
+        if (pattern.test(envVar.name as string) && envVar.value) {
           context.issues.push({
             level: 'warning',
             path: `workflow.environment_variables[${index}]`,
@@ -262,7 +276,7 @@ function validateEnvironmentVariables(context: ValidationContext): void {
   });
 }
 
-function findSensitiveLocation(obj: any, pattern: RegExp, path = ''): string | null {
+function findSensitiveLocation(obj: unknown, pattern: RegExp, path = ''): string | null {
   if (typeof obj === 'string' && pattern.test(obj)) {
     return path;
   }

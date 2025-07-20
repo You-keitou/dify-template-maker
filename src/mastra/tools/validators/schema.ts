@@ -1,5 +1,6 @@
 import {
   CURRENT_DSL_VERSION,
+  type DifyNode,
   EDGE_TYPES,
   type EdgeType,
   NODE_TYPES,
@@ -321,7 +322,7 @@ function validateNodes(context: ValidationContext): void {
         return;
       }
 
-      functionalType = node.data.type;
+      functionalType = node.data.type as string;
     }
 
     // ノードタイプ固有の検証
@@ -375,11 +376,10 @@ function validateNodeData(
   }
 }
 
-function validateLLMNode(context: ValidationContext, node: any, index: number): void {
-  if (node.data.model) {
-    const { model } = node.data;
-
-    if (!model.provider) {
+function validateLLMNode(context: ValidationContext, node: DifyNode, index: number): void {
+  const model = node.data.model as Record<string, unknown> | undefined;
+  if (model && typeof model === 'object') {
+    if (!model.provider || typeof model.provider !== 'string') {
       context.issues.push({
         level: 'error',
         path: `workflow.graph.nodes[${index}].data.model.provider`,
@@ -388,7 +388,7 @@ function validateLLMNode(context: ValidationContext, node: any, index: number): 
       });
     }
 
-    if (!model.name) {
+    if (!model.name || typeof model.name !== 'string') {
       context.issues.push({
         level: 'error',
         path: `workflow.graph.nodes[${index}].data.model.name`,
@@ -421,8 +421,9 @@ function validateLLMNode(context: ValidationContext, node: any, index: number): 
   }
 }
 
-function validateHTTPNode(context: ValidationContext, node: any, index: number): void {
-  if (node.data.url && !isValidURL(node.data.url)) {
+function validateHTTPNode(context: ValidationContext, node: DifyNode, index: number): void {
+  const url = node.data.url;
+  if (url && typeof url === 'string' && !isValidURL(url)) {
     context.issues.push({
       level: 'error',
       path: `workflow.graph.nodes[${index}].data.url`,
@@ -432,25 +433,26 @@ function validateHTTPNode(context: ValidationContext, node: any, index: number):
   }
 
   const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
-  if (node.data.method && !validMethods.includes(node.data.method.toUpperCase())) {
+  const method = node.data.method;
+  if (method && typeof method === 'string' && !validMethods.includes(method.toUpperCase())) {
     context.issues.push({
       level: 'error',
       path: `workflow.graph.nodes[${index}].data.method`,
-      message: `無効なHTTPメソッド: ${node.data.method}`,
+      message: `無効なHTTPメソッド: ${method}`,
       suggestion: `有効なメソッド: ${validMethods.join(', ')}`,
     });
   }
 }
 
-function validateAgentNode(context: ValidationContext, node: any, index: number): void {
-  if (node.data.agent_parameters) {
-    const { agent_parameters } = node.data;
-
+function validateAgentNode(context: ValidationContext, node: DifyNode, index: number): void {
+  const agentParams = node.data.agent_parameters as Record<string, unknown> | undefined;
+  if (agentParams && typeof agentParams === 'object') {
     // モデル設定の検証
-    if (agent_parameters.model) {
-      const { model } = agent_parameters;
-      if (model.type === 'constant' && model.value) {
-        if (!model.value.provider) {
+    const model = agentParams.model as Record<string, unknown> | undefined;
+    if (model && typeof model === 'object' && model.type === 'constant') {
+      const modelValue = model.value as Record<string, unknown> | undefined;
+      if (modelValue && typeof modelValue === 'object') {
+        if (!modelValue.provider || typeof modelValue.provider !== 'string') {
           context.issues.push({
             level: 'warning',
             path: `workflow.graph.nodes[${index}].data.agent_parameters.model.value.provider`,
@@ -459,7 +461,7 @@ function validateAgentNode(context: ValidationContext, node: any, index: number)
           });
         }
 
-        if (!model.value.model) {
+        if (!modelValue.model || typeof modelValue.model !== 'string') {
           context.issues.push({
             level: 'warning',
             path: `workflow.graph.nodes[${index}].data.agent_parameters.model.value.model`,
@@ -471,9 +473,13 @@ function validateAgentNode(context: ValidationContext, node: any, index: number)
     }
 
     // 指示（instruction）の検証
-    if (agent_parameters.instruction && agent_parameters.instruction.type === 'constant') {
-      const instruction = agent_parameters.instruction.value;
-      if (!instruction || instruction.trim() === '') {
+    const instruction = agentParams.instruction as Record<string, unknown> | undefined;
+    if (instruction && typeof instruction === 'object' && instruction.type === 'constant') {
+      const instructionValue = instruction.value;
+      if (
+        !instructionValue ||
+        (typeof instructionValue === 'string' && instructionValue.trim() === '')
+      ) {
         context.issues.push({
           level: 'warning',
           path: `workflow.graph.nodes[${index}].data.agent_parameters.instruction.value`,
@@ -484,11 +490,9 @@ function validateAgentNode(context: ValidationContext, node: any, index: number)
     }
 
     // 最大反復回数の検証
-    if (
-      agent_parameters.maximum_iterations &&
-      agent_parameters.maximum_iterations.type === 'constant'
-    ) {
-      const maxIter = agent_parameters.maximum_iterations.value;
+    const maxIterations = agentParams.maximum_iterations as Record<string, unknown> | undefined;
+    if (maxIterations && typeof maxIterations === 'object' && maxIterations.type === 'constant') {
+      const maxIter = maxIterations.value;
       if (typeof maxIter === 'number' && (maxIter < 1 || maxIter > 100)) {
         context.issues.push({
           level: 'warning',
@@ -565,15 +569,15 @@ function validateEdges(context: ValidationContext): void {
 }
 
 // ヘルパー関数
-function hasNestedProperty(obj: any, path: string): boolean {
+function hasNestedProperty(obj: unknown, path: string): boolean {
   const parts = path.split('.');
-  let current = obj;
+  let current = obj as Record<string, unknown>;
 
   for (const part of parts) {
     if (!current || typeof current !== 'object' || !(part in current)) {
       return false;
     }
-    current = current[part];
+    current = current[part] as Record<string, unknown>;
   }
 
   return true;

@@ -93,7 +93,12 @@ const autoFixHandlers: Record<string, (dsl: DifyDSL) => DifyDSL> = {
         graph: {
           ...dsl.workflow?.graph,
           nodes: nodes.map((node) => {
-            if (node.type === 'llm' && node.data?.temperature > 1.0) {
+            if (
+              node.type === 'llm' &&
+              node.data?.temperature &&
+              typeof node.data.temperature === 'number' &&
+              node.data.temperature > 1.0
+            ) {
               return {
                 ...node,
                 data: {
@@ -104,6 +109,7 @@ const autoFixHandlers: Record<string, (dsl: DifyDSL) => DifyDSL> = {
             }
             return node;
           }),
+          edges: dsl.workflow?.graph?.edges || [],
         },
       },
     };
@@ -129,6 +135,7 @@ const autoFixHandlers: Record<string, (dsl: DifyDSL) => DifyDSL> = {
             }
             return node;
           }),
+          edges: dsl.workflow?.graph?.edges || [],
         },
       },
     };

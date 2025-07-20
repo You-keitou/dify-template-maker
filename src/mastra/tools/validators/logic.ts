@@ -12,7 +12,7 @@ import {
 // ヘルパー関数：ノードの実際のタイプを取得
 function getNodeType(node: DifyNode): string {
   if (node.type === NODE_TYPES.CUSTOM) {
-    return node.data?.type || node.type;
+    return typeof node.data?.type === 'string' ? node.data.type : node.type;
   }
   return node.type;
 }
@@ -449,18 +449,22 @@ function levenshteinDistance(a: string, b: string): number {
   return matrix[b.length][a.length];
 }
 
-function extractVariables(obj: unknown, currentPath = ''): Array<{ variable: string; path: string }> {
+function extractVariables(
+  obj: unknown,
+  currentPath = '',
+): Array<{ variable: string; path: string }> {
   const results: Array<{ variable: string; path: string }> = [];
   // Use the authoritative pattern from types
   const variablePattern = new RegExp(VARIABLE_PATTERN.source, 'g');
 
   if (typeof obj === 'string') {
-    let match: RegExpExecArray | null;
-    while ((match = variablePattern.exec(obj)) !== null) {
+    let match = variablePattern.exec(obj);
+    while (match !== null) {
       results.push({
         variable: match[1],
         path: currentPath,
       });
+      match = variablePattern.exec(obj);
     }
   } else if (Array.isArray(obj)) {
     obj.forEach((item, index) => {
