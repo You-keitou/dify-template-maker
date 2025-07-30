@@ -1,6 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { Agent } from '@mastra/core/agent';
 import { analyzeRequestTool } from '../tools/analyze_request';
+import { createDSLYamlTool } from '../tools/create_dsl_yaml';
 import { validateDSLTool } from '../tools/validate_dsl';
 import {
   updatePreferencesTool,
@@ -44,4 +45,5 @@ export const difyTemplateMakerAgent = new Agent({
     getPreferencesTool,
   },
   memory: agentMemory,
+  tools: { analyzeRequestTool, createDSLYamlTool, validateDSLTool }
 });

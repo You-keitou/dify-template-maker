@@ -40,6 +40,24 @@ export interface DifyDSL {
     conversation_variables?: ConversationVariable[];
     hash?: string;
   };
+  dependencies?: DifyDependency[];
+  model_config?: Record<string, unknown>;
+}
+
+export interface DifyDependency {
+  current_identifier: string | null;
+  type: 'marketplace' | 'builtin';
+  value: {
+    marketplace_plugin_unique_identifier?: string;
+  };
+}
+
+// 汎用的なノードデータ型定義
+export interface NodeDataBase {
+  desc?: string;
+  selected?: boolean;
+  title?: string;
+  type?: string;
 }
 
 export interface DifyNode {
@@ -49,7 +67,20 @@ export interface DifyNode {
     x: number;
     y: number;
   };
+  positionAbsolute?: {
+    x: number;
+    y: number;
+  };
   data: Record<string, unknown>;
+  width?: number;
+  height?: number;
+  zIndex?: number;
+  selected?: boolean;
+  sourcePosition?: 'right' | 'left' | 'top' | 'bottom';
+  targetPosition?: 'right' | 'left' | 'top' | 'bottom';
+  draggable?: boolean;
+  selectable?: boolean;
+  parentId?: string;
 }
 
 export interface DifyEdge {
@@ -60,6 +91,8 @@ export interface DifyEdge {
   targetHandle?: string;
   type?: string;
   data?: Record<string, unknown>;
+  zIndex?: number;
+  selected?: boolean;
 }
 
 export interface NodeTypeValidation {
