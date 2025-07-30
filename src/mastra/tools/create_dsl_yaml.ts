@@ -11,6 +11,54 @@ import {
   NODE_TYPES,
 } from './validators';
 
+// Zod schemas for better type safety
+const conversationVariableSchema = z.object({
+  name: z.string(),
+  value_type: z.enum([
+    'string',
+    'number',
+    'object',
+    'array[string]',
+    'array[number]',
+    'array[object]',
+  ]),
+  description: z.string().optional(),
+  selector: z.array(z.string()).optional(),
+  value: z.unknown().optional(),
+});
+
+const difyDependencySchema = z.object({
+  current_identifier: z.string().nullable(),
+  type: z.enum(['marketplace', 'builtin']),
+  value: z.object({
+    marketplace_plugin_unique_identifier: z.string().optional(),
+  }),
+});
+
+const completionParamsSchema = z
+  .object({
+    temperature: z.number().optional(),
+    top_p: z.number().optional(),
+    max_tokens: z.number().optional(),
+    presence_penalty: z.number().optional(),
+    frequency_penalty: z.number().optional(),
+  })
+  .catchall(z.unknown());
+
+const modelConfigSchema = z
+  .object({
+    provider: z.string(),
+    name: z.string(),
+    mode: z.string().optional(),
+    completion_params: completionParamsSchema.optional(),
+  })
+  .catchall(z.unknown());
+
+// Helper function to get real node type
+function getRealNodeType(node: { type: string; data?: Record<string, unknown> }): string {
+  return (node.data?.type as string) || node.type;
+}
+
 // 入力スキーマの定義
 const appMetadataSchema = z.object({
   name: z.string().describe('アプリケーション名'),
@@ -54,9 +102,9 @@ const inputSchema = z.object({
   edges: z.array(edgeSchema).describe('エッジの配列'),
   model_config: z.record(z.unknown()).optional().describe('モデル設定'),
   features: z.record(z.unknown()).optional().describe('機能設定'),
-  dependencies: z.array(z.unknown()).optional().describe('依存関係'),
+  dependencies: z.array(difyDependencySchema).optional().describe('依存関係'),
   environment_variables: z.array(z.record(z.unknown())).optional().describe('環境変数'),
-  conversation_variables: z.array(z.record(z.unknown())).optional().describe('会話変数'),
+  conversation_variables: z.array(conversationVariableSchema).optional().describe('会話変数'),
 });
 
 const outputSchema = z.object({
@@ -157,7 +205,7 @@ class NodeTransformer {
   private generateNodeId(nodeType: string): string {
     const count = this.nodeCounter.get(nodeType) || 0;
     this.nodeCounter.set(nodeType, count + 1);
-    return `${nodeType}-${Date.now()}-${count}`;
+    return `${nodeType}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-${count}`;
   }
 
   private calculateDefaultPosition(index: number): { x: number; y: number } {
@@ -227,7 +275,15 @@ class NodeTransformer {
   }
 
   private transformLLMNodeData(data: Record<string, unknown>): Record<string, unknown> {
-    const model = (data.model as Record<string, unknown>) || {};
+    const rawModel = (data.model as Record<string, unknown>) || {};
+    const modelResult = modelConfigSchema.safeParse(rawModel);
+    const model = modelResult.success ? modelResult.data : rawModel;
+
+    const rawCompletionParams = (model.completion_params as Record<string, unknown>) || {};
+    const completionParamsResult = completionParamsSchema.safeParse(rawCompletionParams);
+    const completionParams = completionParamsResult.success
+      ? completionParamsResult.data
+      : rawCompletionParams;
 
     return {
       ...data,
@@ -236,15 +292,10 @@ class NodeTransformer {
         name: (model.name as string) || 'gpt-4',
         mode: (model.mode as string) || DEFAULT_VALUES.llm.mode,
         completion_params: {
-          temperature:
-            (model.completion_params as Record<string, unknown>)?.temperature ??
-            DEFAULT_VALUES.llm.temperature,
-          top_p:
-            (model.completion_params as Record<string, unknown>)?.top_p ?? DEFAULT_VALUES.llm.top_p,
-          max_tokens:
-            (model.completion_params as Record<string, unknown>)?.max_tokens ??
-            DEFAULT_VALUES.llm.max_tokens,
-          ...(model.completion_params as Record<string, unknown>),
+          temperature: (completionParams.temperature as number) ?? DEFAULT_VALUES.llm.temperature,
+          top_p: (completionParams.top_p as number) ?? DEFAULT_VALUES.llm.top_p,
+          max_tokens: (completionParams.max_tokens as number) ?? DEFAULT_VALUES.llm.max_tokens,
+          ...completionParams,
         },
         ...model,
       },
@@ -385,7 +436,7 @@ class DependencyDetector {
     const dependencyArray: DifyDependency[] = [];
 
     for (const node of nodes) {
-      if (node.data?.type === NODE_TYPES.TOOL || node.type === NODE_TYPES.TOOL) {
+      if (getRealNodeType(node) === NODE_TYPES.TOOL) {
         const providerId = node.data?.provider_id as string;
         const providerName = node.data?.provider_name as string;
         const toolName = node.data?.tool_name as string;
@@ -406,7 +457,7 @@ class DependencyDetector {
       }
 
       // エージェントノードの依存関係
-      if (node.data?.type === NODE_TYPES.AGENT || node.type === NODE_TYPES.AGENT) {
+      if (getRealNodeType(node) === NODE_TYPES.AGENT) {
         const pluginId = node.data?.plugin_unique_identifier as string;
         if (pluginId) {
           dependencyArray.push({
@@ -460,9 +511,21 @@ export const createDSLYamlTool = createTool({
       // エッジの変換
       const transformedEdges = edges.map((edge) => edgeTransformer.transformEdge(edge, nodeMap));
 
-      // 依存関係の自動検出
+      // 依存関係の自動検出と安全な型チェック
       const detectedDependencies = dependencyDetector.detectDependencies(transformedNodes);
-      const finalDependencies = (dependencies as DifyDependency[]) || detectedDependencies;
+      let finalDependencies: DifyDependency[] = detectedDependencies;
+
+      if (dependencies) {
+        const dependenciesResult = z.array(difyDependencySchema).safeParse(dependencies);
+        if (dependenciesResult.success) {
+          finalDependencies = dependenciesResult.data;
+        } else {
+          console.warn(
+            'Invalid dependencies provided, using auto-detected dependencies:',
+            dependenciesResult.error,
+          );
+        }
+      }
 
       // DSL構造の構築
       const dsl: DifyDSL = {
@@ -488,7 +551,7 @@ export const createDSLYamlTool = createTool({
           },
           features: features || DEFAULT_VALUES.features,
           environment_variables: environment_variables || [],
-          conversation_variables: (conversation_variables as never) || [],
+          conversation_variables: conversation_variables || [],
         };
       }
 
@@ -508,7 +571,7 @@ export const createDSLYamlTool = createTool({
       // 統計情報の生成
       const nodeTypeCounts: Record<string, number> = {};
       transformedNodes.forEach((node) => {
-        const type = (node.data?.type as string) || node.type;
+        const type = getRealNodeType(node);
         nodeTypeCounts[type] = (nodeTypeCounts[type] || 0) + 1;
       });
 
