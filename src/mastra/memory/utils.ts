@@ -89,7 +89,10 @@ export async function saveTemplateHistory(
           threadId,
           resourceId,
           role: 'system',
-          content: JSON.stringify(historyRecord),
+          content: JSON.stringify({
+            messageType: 'template_history',
+            data: historyRecord,
+          }),
           createdAt: new Date(),
           type: 'text' as const,
         },
@@ -105,29 +108,39 @@ export async function saveTemplateHistory(
  */
 export async function findSimilarTemplates(
   resourceId: string,
-  _request: string,
+  request: string,
   limit: number = 3,
 ): Promise<TemplateHistory[]> {
   try {
-    // Use semantic search to find similar requests
+    // Get recent templates first
     const results = await agentMemory.query({
       threadId: `templates-${resourceId}`,
       resourceId,
-      selectBy: { last: limit * 2 },
+      selectBy: { last: limit * 10 }, // Get more to filter
     });
 
     const templates: TemplateHistory[] = [];
+    const requestLower = request.toLowerCase();
 
     for (const message of results.messages || []) {
-      if (
-        message.content &&
-        typeof message.content === 'string' &&
-        message.content.includes('"generatedTemplate"')
-      ) {
+      if (message.content && typeof message.content === 'string') {
         try {
-          const template = JSON.parse(message.content as string) as TemplateHistory;
-          templates.push(template);
-          if (templates.length >= limit) break;
+          const parsedContent = JSON.parse(message.content as string);
+          let template: TemplateHistory | null = null;
+
+          // Check for message type in a more robust way
+          if (parsedContent.messageType === 'template_history' && parsedContent.data) {
+            template = parsedContent.data as TemplateHistory;
+          } else if (parsedContent.generatedTemplate) {
+            // Backward compatibility with old format
+            template = parsedContent as TemplateHistory;
+          }
+
+          // Filter by request similarity
+          if (template?.request.toLowerCase().includes(requestLower)) {
+            templates.push(template);
+            if (templates.length >= limit) break;
+          }
         } catch {
           // Skip invalid entries
         }
@@ -160,19 +173,28 @@ export async function updateLearnedPattern(
     let existingPattern: LearnedPattern | null = null;
 
     for (const message of existingPatterns.messages || []) {
-      if (
-        message.content &&
-        typeof message.content === 'string' &&
-        message.content.includes('"patternId"')
-      ) {
+      if (message.content && typeof message.content === 'string') {
         try {
-          const p = JSON.parse(message.content as string) as LearnedPattern;
-          if (
-            p.requestPattern === pattern.requestPattern &&
-            p.workflowType === pattern.workflowType
-          ) {
-            existingPattern = p;
-            break;
+          const parsedContent = JSON.parse(message.content as string);
+          if (parsedContent.messageType === 'learned_pattern' && parsedContent.data) {
+            const p = parsedContent.data as LearnedPattern;
+            if (
+              p.requestPattern === pattern.requestPattern &&
+              p.workflowType === pattern.workflowType
+            ) {
+              existingPattern = p;
+              break;
+            }
+          } else if (parsedContent.patternId) {
+            // Backward compatibility
+            const p = parsedContent as LearnedPattern;
+            if (
+              p.requestPattern === pattern.requestPattern &&
+              p.workflowType === pattern.workflowType
+            ) {
+              existingPattern = p;
+              break;
+            }
           }
         } catch {
           // Skip invalid entries
@@ -203,7 +225,10 @@ export async function updateLearnedPattern(
           threadId,
           resourceId,
           role: 'system',
-          content: JSON.stringify(updatedPattern),
+          content: JSON.stringify({
+            messageType: 'learned_pattern',
+            data: updatedPattern,
+          }),
           createdAt: new Date(),
           type: 'text' as const,
         },
@@ -219,7 +244,7 @@ export async function updateLearnedPattern(
  */
 export async function getLearnedPatterns(
   resourceId: string,
-  _workflowType?: string,
+  workflowType?: string,
 ): Promise<LearnedPattern[]> {
   try {
     const results = await agentMemory.query({
@@ -232,16 +257,24 @@ export async function getLearnedPatterns(
     const seenPatternIds = new Set<string>();
 
     for (const message of results.messages || []) {
-      if (
-        message.content &&
-        typeof message.content === 'string' &&
-        message.content.includes('"patternId"')
-      ) {
+      if (message.content && typeof message.content === 'string') {
         try {
-          const pattern = JSON.parse(message.content as string) as LearnedPattern;
-          if (!seenPatternIds.has(pattern.patternId)) {
-            seenPatternIds.add(pattern.patternId);
-            patterns.push(pattern);
+          const parsedContent = JSON.parse(message.content as string);
+          let pattern: LearnedPattern | null = null;
+
+          if (parsedContent.messageType === 'learned_pattern' && parsedContent.data) {
+            pattern = parsedContent.data as LearnedPattern;
+          } else if (parsedContent.patternId) {
+            // Backward compatibility
+            pattern = parsedContent as LearnedPattern;
+          }
+
+          if (pattern && !seenPatternIds.has(pattern.patternId)) {
+            // Filter by workflowType if specified
+            if (!workflowType || pattern.workflowType === workflowType) {
+              seenPatternIds.add(pattern.patternId);
+              patterns.push(pattern);
+            }
           }
         } catch {
           // Skip invalid entries
