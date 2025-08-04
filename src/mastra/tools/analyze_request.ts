@@ -38,10 +38,12 @@ export const analyzeRequestTool = createTool({
   execute: async ({ context }) => {
     try {
       // Import memory utilities dynamically to avoid circular dependencies
-      const { getUserPreferences, findSimilarTemplates, getLearnedPatterns } = await import('../memory/utils');
-      
+      const { getUserPreferences, findSimilarTemplates, getLearnedPatterns } = await import(
+        '../memory/utils'
+      );
+
       let enhancedPrompt = `Analyze this Dify workflow request and extract structured information: "${context.request}"`;
-      
+
       // Add memory context if available
       if (context.resourceId) {
         // Get user preferences
@@ -53,7 +55,7 @@ export const analyzeRequestTool = createTool({
 - Industry context: ${preferences.industryContext || 'Not specified'}
 - Complexity preference: ${preferences.complexityPreference || 'Not specified'}`;
         }
-        
+
         // Find similar past templates
         const similarTemplates = await findSimilarTemplates(context.resourceId, context.request, 3);
         if (similarTemplates.length > 0) {
@@ -64,7 +66,7 @@ export const analyzeRequestTool = createTool({
    - Feedback: ${template.feedback || 'No feedback'}`;
           });
         }
-        
+
         // Get learned patterns
         const patterns = await getLearnedPatterns(context.resourceId);
         if (patterns.length > 0) {
@@ -76,12 +78,9 @@ export const analyzeRequestTool = createTool({
       }
 
       // Use the agent to analyze the request with structured output
-      const result = await requestAnalyzerAgent.generate(
-        enhancedPrompt,
-        {
-          output: outputSchema,
-        },
-      );
+      const result = await requestAnalyzerAgent.generate(enhancedPrompt, {
+        output: outputSchema,
+      });
 
       // Return the structured output
       if (result.object) {
@@ -94,7 +93,7 @@ export const analyzeRequestTool = createTool({
             workflowType: result.object.workflow_type,
           });
         }
-        
+
         return result.object;
       }
 

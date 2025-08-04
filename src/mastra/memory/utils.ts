@@ -1,21 +1,26 @@
-import { randomUUID } from 'crypto';
-import { agentMemory, type UserPreferences, type TemplateHistory, type LearnedPattern } from './index';
+import { randomUUID } from 'node:crypto';
+import {
+  agentMemory,
+  type LearnedPattern,
+  type TemplateHistory,
+  type UserPreferences,
+} from './index';
 
 /**
  * Get user preferences from memory
  */
 export async function getUserPreferences(resourceId: string): Promise<UserPreferences | null> {
   try {
-    // Query memory for user preferences
+    // Get messages from memory for user preferences
     const results = await agentMemory.query({
+      threadId: `preferences-${resourceId}`,
       resourceId,
-      query: 'user preferences settings configuration',
-      limit: 1,
+      selectBy: { last: 1 },
     });
 
-    if (results.length > 0) {
+    if (results.messages && results.messages.length > 0) {
       // Parse preferences from the stored message
-      const prefMessage = results[0];
+      const prefMessage = results.messages[0];
       if (prefMessage.content && typeof prefMessage.content === 'string') {
         try {
           return JSON.parse(prefMessage.content) as UserPreferences;
@@ -42,15 +47,18 @@ export async function saveUserPreferences(
 ): Promise<void> {
   try {
     // Store preferences as a system message in memory
-    await agentMemory.createMessage({
-      threadId,
-      resourceId,
-      role: 'system',
-      content: JSON.stringify(preferences),
-      metadata: {
-        type: 'user_preferences',
-        timestamp: new Date().toISOString(),
-      },
+    await agentMemory.saveMessages({
+      messages: [
+        {
+          id: randomUUID(),
+          threadId,
+          resourceId,
+          role: 'system',
+          content: JSON.stringify(preferences),
+          createdAt: new Date(),
+          type: 'text' as const,
+        },
+      ],
     });
   } catch (error) {
     console.error('Error saving user preferences:', error);
@@ -74,16 +82,21 @@ export async function saveTemplateHistory(
     };
 
     // Store template history as a system message
-    await agentMemory.createMessage({
-      threadId,
-      resourceId,
-      role: 'system',
-      content: JSON.stringify(historyRecord),
-      metadata: {
-        type: 'template_history',
-        workflowType: template.generatedTemplate?.workflow?.type || 'unknown',
-        timestamp: new Date().toISOString(),
-      },
+    await agentMemory.saveMessages({
+      messages: [
+        {
+          id: randomUUID(),
+          threadId,
+          resourceId,
+          role: 'system',
+          content: JSON.stringify({
+            messageType: 'template_history',
+            data: historyRecord,
+          }),
+          createdAt: new Date(),
+          type: 'text' as const,
+        },
+      ],
     });
   } catch (error) {
     console.error('Error saving template history:', error);
@@ -99,21 +112,35 @@ export async function findSimilarTemplates(
   limit: number = 3,
 ): Promise<TemplateHistory[]> {
   try {
-    // Use semantic search to find similar requests
+    // Get recent templates first
     const results = await agentMemory.query({
+      threadId: `templates-${resourceId}`,
       resourceId,
-      query: request,
-      limit: limit * 2, // Get more results to filter
+      selectBy: { last: limit * 10 }, // Get more to filter
     });
 
     const templates: TemplateHistory[] = [];
-    
-    for (const message of results) {
-      if (message.metadata?.type === 'template_history' && message.content) {
+    const requestLower = request.toLowerCase();
+
+    for (const message of results.messages || []) {
+      if (message.content && typeof message.content === 'string') {
         try {
-          const template = JSON.parse(message.content as string) as TemplateHistory;
-          templates.push(template);
-          if (templates.length >= limit) break;
+          const parsedContent = JSON.parse(message.content as string);
+          let template: TemplateHistory | null = null;
+
+          // Check for message type in a more robust way
+          if (parsedContent.messageType === 'template_history' && parsedContent.data) {
+            template = parsedContent.data as TemplateHistory;
+          } else if (parsedContent.generatedTemplate) {
+            // Backward compatibility with old format
+            template = parsedContent as TemplateHistory;
+          }
+
+          // Filter by request similarity
+          if (template?.request.toLowerCase().includes(requestLower)) {
+            templates.push(template);
+            if (templates.length >= limit) break;
+          }
         } catch {
           // Skip invalid entries
         }
@@ -138,20 +165,36 @@ export async function updateLearnedPattern(
   try {
     // Check if pattern already exists
     const existingPatterns = await agentMemory.query({
+      threadId: `patterns-${resourceId}`,
       resourceId,
-      query: `${pattern.requestPattern} ${pattern.workflowType}`,
-      limit: 5,
+      selectBy: { last: 5 },
     });
 
     let existingPattern: LearnedPattern | null = null;
-    
-    for (const message of existingPatterns) {
-      if (message.metadata?.type === 'learned_pattern' && message.content) {
+
+    for (const message of existingPatterns.messages || []) {
+      if (message.content && typeof message.content === 'string') {
         try {
-          const p = JSON.parse(message.content as string) as LearnedPattern;
-          if (p.requestPattern === pattern.requestPattern && p.workflowType === pattern.workflowType) {
-            existingPattern = p;
-            break;
+          const parsedContent = JSON.parse(message.content as string);
+          if (parsedContent.messageType === 'learned_pattern' && parsedContent.data) {
+            const p = parsedContent.data as LearnedPattern;
+            if (
+              p.requestPattern === pattern.requestPattern &&
+              p.workflowType === pattern.workflowType
+            ) {
+              existingPattern = p;
+              break;
+            }
+          } else if (parsedContent.patternId) {
+            // Backward compatibility
+            const p = parsedContent as LearnedPattern;
+            if (
+              p.requestPattern === pattern.requestPattern &&
+              p.workflowType === pattern.workflowType
+            ) {
+              existingPattern = p;
+              break;
+            }
           }
         } catch {
           // Skip invalid entries
@@ -159,30 +202,37 @@ export async function updateLearnedPattern(
       }
     }
 
-    const updatedPattern: LearnedPattern = existingPattern ? {
-      ...existingPattern,
-      frequency: existingPattern.frequency + 1,
-      successRate: existingPattern.successRate, // Could be updated based on feedback
-      lastUsed: new Date(),
-    } : {
-      patternId: randomUUID(),
-      ...pattern,
-      frequency: 1,
-      successRate: 1.0,
-      lastUsed: new Date(),
-    };
+    const updatedPattern: LearnedPattern = existingPattern
+      ? {
+          ...existingPattern,
+          frequency: existingPattern.frequency + 1,
+          successRate: existingPattern.successRate, // Could be updated based on feedback
+          lastUsed: new Date(),
+        }
+      : {
+          patternId: randomUUID(),
+          ...pattern,
+          frequency: 1,
+          successRate: 1.0,
+          lastUsed: new Date(),
+        };
 
     // Store updated pattern
-    await agentMemory.createMessage({
-      threadId,
-      resourceId,
-      role: 'system',
-      content: JSON.stringify(updatedPattern),
-      metadata: {
-        type: 'learned_pattern',
-        workflowType: pattern.workflowType,
-        timestamp: new Date().toISOString(),
-      },
+    await agentMemory.saveMessages({
+      messages: [
+        {
+          id: randomUUID(),
+          threadId,
+          resourceId,
+          role: 'system',
+          content: JSON.stringify({
+            messageType: 'learned_pattern',
+            data: updatedPattern,
+          }),
+          createdAt: new Date(),
+          type: 'text' as const,
+        },
+      ],
     });
   } catch (error) {
     console.error('Error updating learned pattern:', error);
@@ -197,23 +247,34 @@ export async function getLearnedPatterns(
   workflowType?: string,
 ): Promise<LearnedPattern[]> {
   try {
-    const query = workflowType ? `learned pattern ${workflowType}` : 'learned pattern';
     const results = await agentMemory.query({
+      threadId: `patterns-${resourceId}`,
       resourceId,
-      query,
-      limit: 20,
+      selectBy: { last: 20 },
     });
 
     const patterns: LearnedPattern[] = [];
     const seenPatternIds = new Set<string>();
-    
-    for (const message of results) {
-      if (message.metadata?.type === 'learned_pattern' && message.content) {
+
+    for (const message of results.messages || []) {
+      if (message.content && typeof message.content === 'string') {
         try {
-          const pattern = JSON.parse(message.content as string) as LearnedPattern;
-          if (!seenPatternIds.has(pattern.patternId)) {
-            seenPatternIds.add(pattern.patternId);
-            patterns.push(pattern);
+          const parsedContent = JSON.parse(message.content as string);
+          let pattern: LearnedPattern | null = null;
+
+          if (parsedContent.messageType === 'learned_pattern' && parsedContent.data) {
+            pattern = parsedContent.data as LearnedPattern;
+          } else if (parsedContent.patternId) {
+            // Backward compatibility
+            pattern = parsedContent as LearnedPattern;
+          }
+
+          if (pattern && !seenPatternIds.has(pattern.patternId)) {
+            // Filter by workflowType if specified
+            if (!workflowType || pattern.workflowType === workflowType) {
+              seenPatternIds.add(pattern.patternId);
+              patterns.push(pattern);
+            }
           }
         } catch {
           // Skip invalid entries
@@ -223,8 +284,10 @@ export async function getLearnedPatterns(
 
     // Sort by frequency and recency
     return patterns.sort((a, b) => {
-      const scoreA = a.frequency * a.successRate * (1 / (Date.now() - new Date(a.lastUsed).getTime()));
-      const scoreB = b.frequency * b.successRate * (1 / (Date.now() - new Date(b.lastUsed).getTime()));
+      const scoreA =
+        a.frequency * a.successRate * (1 / (Date.now() - new Date(a.lastUsed).getTime()));
+      const scoreB =
+        b.frequency * b.successRate * (1 / (Date.now() - new Date(b.lastUsed).getTime()));
       return scoreB - scoreA;
     });
   } catch (error) {

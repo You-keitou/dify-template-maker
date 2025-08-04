@@ -1,15 +1,14 @@
 import { google } from '@ai-sdk/google';
 import { Agent } from '@mastra/core/agent';
+import { agentMemory } from '../memory';
 import { analyzeRequestTool } from '../tools/analyze_request';
-import { createDSLYamlTool } from '../tools/create_dsl_yaml';
-import { validateDSLTool } from '../tools/validate_dsl';
 import {
-  updatePreferencesTool,
-  searchTemplateHistoryTool,
   getLearnedPatternsTool,
   getPreferencesTool,
+  searchTemplateHistoryTool,
+  updatePreferencesTool,
 } from '../tools/memory_management';
-import { agentMemory } from '../memory';
+import { validateDSLTool } from '../tools/validate_dsl';
 
 export const difyTemplateMakerAgent = new Agent({
   name: 'Dify Template Maker Agent',
@@ -45,5 +44,4 @@ export const difyTemplateMakerAgent = new Agent({
     getPreferencesTool,
   },
   memory: agentMemory,
-  tools: { analyzeRequestTool, createDSLYamlTool, validateDSLTool }
 });
