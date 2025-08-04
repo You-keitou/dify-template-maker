@@ -1,11 +1,11 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
+import type { UserPreferences } from '../memory';
 import {
-  getUserPreferences,
-  saveUserPreferences,
   findSimilarTemplates,
   getLearnedPatterns,
-  type UserPreferences,
+  getUserPreferences,
+  saveUserPreferences,
 } from '../memory/utils';
 
 // Update user preferences tool
@@ -20,37 +20,43 @@ export const updatePreferencesTool = createTool({
       commonFeatures: z.array(z.string()).optional().describe('よく使う機能'),
       industryContext: z.string().optional().describe('業界コンテキスト'),
       language: z.enum(['ja', 'en']).optional().describe('言語設定'),
-      complexityPreference: z.enum(['simple', 'medium', 'complex']).optional().describe('複雑度の好み'),
+      complexityPreference: z
+        .enum(['simple', 'medium', 'complex'])
+        .optional()
+        .describe('複雑度の好み'),
     }),
   }),
   outputSchema: z.object({
     success: z.boolean(),
     message: z.string(),
-    updatedPreferences: z.object({
-      workflowTypes: z.array(z.string()),
-      commonFeatures: z.array(z.string()),
-      industryContext: z.string().optional(),
-      language: z.enum(['ja', 'en']).optional(),
-      complexityPreference: z.enum(['simple', 'medium', 'complex']).optional(),
-    }).optional(),
+    updatedPreferences: z
+      .object({
+        workflowTypes: z.array(z.string()),
+        commonFeatures: z.array(z.string()),
+        industryContext: z.string().optional(),
+        language: z.enum(['ja', 'en']).optional(),
+        complexityPreference: z.enum(['simple', 'medium', 'complex']).optional(),
+      })
+      .optional(),
   }),
   execute: async ({ context }) => {
     try {
       // Get existing preferences
       const existingPrefs = await getUserPreferences(context.resourceId);
-      
+
       // Merge with new preferences
       const updatedPreferences: UserPreferences = {
         workflowTypes: context.preferences.workflowTypes || existingPrefs?.workflowTypes || [],
         commonFeatures: context.preferences.commonFeatures || existingPrefs?.commonFeatures || [],
         industryContext: context.preferences.industryContext || existingPrefs?.industryContext,
         language: context.preferences.language || existingPrefs?.language || 'ja',
-        complexityPreference: context.preferences.complexityPreference || existingPrefs?.complexityPreference,
+        complexityPreference:
+          context.preferences.complexityPreference || existingPrefs?.complexityPreference,
       };
-      
+
       // Save updated preferences
       await saveUserPreferences(context.resourceId, context.threadId, updatedPreferences);
-      
+
       return {
         success: true,
         message: 'ユーザー設定を更新しました',
@@ -77,14 +83,16 @@ export const searchTemplateHistoryTool = createTool({
   }),
   outputSchema: z.object({
     success: z.boolean(),
-    results: z.array(z.object({
-      id: z.string(),
-      request: z.string(),
-      workflowType: z.string().optional(),
-      createdAt: z.string(),
-      feedback: z.enum(['positive', 'negative', 'neutral']).optional(),
-      similarity: z.number().min(0).max(1).optional(),
-    })),
+    results: z.array(
+      z.object({
+        id: z.string(),
+        request: z.string(),
+        workflowType: z.string().optional(),
+        createdAt: z.string(),
+        feedback: z.enum(['positive', 'negative', 'neutral']).optional(),
+        similarity: z.number().min(0).max(1).optional(),
+      }),
+    ),
     message: z.string().optional(),
   }),
   execute: async ({ context }) => {
@@ -94,7 +102,7 @@ export const searchTemplateHistoryTool = createTool({
         context.query,
         context.limit,
       );
-      
+
       const results = templates.map((template) => ({
         id: template.id,
         request: template.request,
@@ -102,7 +110,7 @@ export const searchTemplateHistoryTool = createTool({
         createdAt: template.createdAt.toISOString(),
         feedback: template.feedback,
       }));
-      
+
       return {
         success: true,
         results,
@@ -129,29 +137,28 @@ export const getLearnedPatternsTool = createTool({
   }),
   outputSchema: z.object({
     success: z.boolean(),
-    patterns: z.array(z.object({
-      patternId: z.string(),
-      requestPattern: z.string(),
-      workflowType: z.string(),
-      templateFeatures: z.array(z.string()),
-      frequency: z.number(),
-      successRate: z.number(),
-      lastUsed: z.string(),
-    })),
+    patterns: z.array(
+      z.object({
+        patternId: z.string(),
+        requestPattern: z.string(),
+        workflowType: z.string(),
+        templateFeatures: z.array(z.string()),
+        frequency: z.number(),
+        successRate: z.number(),
+        lastUsed: z.string(),
+      }),
+    ),
     message: z.string().optional(),
   }),
   execute: async ({ context }) => {
     try {
-      const patterns = await getLearnedPatterns(
-        context.resourceId,
-        context.workflowType,
-      );
-      
+      const patterns = await getLearnedPatterns(context.resourceId, context.workflowType);
+
       const results = patterns.map((pattern) => ({
         ...pattern,
         lastUsed: pattern.lastUsed.toISOString(),
       }));
-      
+
       return {
         success: true,
         patterns: results,
@@ -177,19 +184,21 @@ export const getPreferencesTool = createTool({
   }),
   outputSchema: z.object({
     success: z.boolean(),
-    preferences: z.object({
-      workflowTypes: z.array(z.string()),
-      commonFeatures: z.array(z.string()),
-      industryContext: z.string().optional(),
-      language: z.enum(['ja', 'en']).optional(),
-      complexityPreference: z.enum(['simple', 'medium', 'complex']).optional(),
-    }).optional(),
+    preferences: z
+      .object({
+        workflowTypes: z.array(z.string()),
+        commonFeatures: z.array(z.string()),
+        industryContext: z.string().optional(),
+        language: z.enum(['ja', 'en']).optional(),
+        complexityPreference: z.enum(['simple', 'medium', 'complex']).optional(),
+      })
+      .optional(),
     message: z.string(),
   }),
   execute: async ({ context }) => {
     try {
       const preferences = await getUserPreferences(context.resourceId);
-      
+
       if (preferences) {
         return {
           success: true,

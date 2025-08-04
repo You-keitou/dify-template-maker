@@ -1,6 +1,6 @@
-import { Memory } from '@mastra/memory';
-import { LibSQLStore, LibSQLVector } from '@mastra/libsql';
 import { fastembed } from '@mastra/fastembed';
+import { LibSQLStore, LibSQLVector } from '@mastra/libsql';
+import { Memory } from '@mastra/memory';
 
 // Initialize memory with LibSQL for local development
 export const createMemory = () => {
