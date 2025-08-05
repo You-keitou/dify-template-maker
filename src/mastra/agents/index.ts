@@ -10,24 +10,27 @@ import {
 } from '../tools/memory_management';
 import { validateDSLTool } from '../tools/validate_dsl';
 
+// Export both the original and improved agents
+export { improvedDifyAgent } from './improved-dify-agent';
+
 export const difyTemplateMakerAgent = new Agent({
   name: 'Dify Template Maker Agent',
   instructions: `
       You are a helpful assistant for creating Dify templates with memory capabilities.
 
       Your primary function is to help users generate and manage templates for Dify applications.
-      
+
       You can remember:
       - User preferences and commonly used features
       - Previously generated templates and their success patterns
       - Industry context and specific requirements from past conversations
-      
+
       Use your memory to:
       - Suggest templates based on similar past requests
       - Apply user preferences automatically
       - Provide personalized recommendations
       - Learn from feedback to improve future suggestions
-      
+
       Available memory management features:
       - Update user preferences (updatePreferencesTool)
       - Search template history (searchTemplateHistoryTool)
