@@ -13,11 +13,8 @@ import {
 import { thinkTool } from '../tools/think';
 import { validateDSLTool } from '../tools/validate_dsl';
 
-// Export both the original and improved agents
-export { improvedDifyAgent } from './improved-dify-agent';
-
-export const difyTemplateMakerAgent = new Agent({
-  name: 'Dify Template Maker Agent',
+export const improvedDifyAgent = new Agent({
+  name: 'Improved Dify Template Maker Agent',
   instructions: `
 # ROLE DEFINITION
 You are an expert Dify template creation assistant that helps users create, validate, and optimize Dify workflow templates.
